@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Islamic Gateway - Muslim Web</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --green: #065f46; --gold: #d4af37; --light: #f0fdf4; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--light); overflow-x: hidden; }
+        
+        /* Auth Screen */
+        #auth-screen {
+            height: 100vh; background: var(--green); display: flex; 
+            justify-content: center; align-items: center; color: white;
+        }
+        .auth-card { background: white; padding: 30px; border-radius: 20px; width: 300px; color: #333; text-align: center; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+        .btn-primary { background: var(--green); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%; }
+
+        /* Main App Layout */
+        #main-site { display: none; }
+        header { 
+            background: var(--green); color: white; padding: 15px; 
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .profile-box { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { font-size: 28px; background: white; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
+        
+        .diamond-bar { background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+
+        /* Settings Dropdown */
+        #settings-menu {
+            display: none; position: absolute; right: 15px; top: 65px; 
+            background: white; border-radius: 12px; padding: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 220px; z-index: 1000;
+        }
+
+        /* Dashboard Grid */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .card { 
+            background: white; border: 2px solid var(--green); border-radius: 15px; 
+            padding: 30px 10px; text-align: center; cursor: pointer; font-weight: bold; color: var(--green);
+            transition: 0.3s;
+        }
+        .card:hover { background: var(--green); color: white; }
+
+        /* Content Area */
+        #content-view { display: none; padding: 20px; background: white; margin: 15px; border-radius: 15px; border: 1px solid #ddd; }
+        
+        .shop-item { border: 1px solid #eee; padding: 10px; margin: 5px; border-radius: 10px; display: inline-block; width: 80px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h2 style="color: var(--green)">Muslim Web</h2>
+            <input type="text" id="reg-name" placeholder="User Name">
+            <input type="email" id="reg-email" placeholder="Gmail Address">
+            <input type="password" id="reg-pass" placeholder="Password">
+            <button class="btn-primary" onclick="startApp()">Login / Signup</button>
+        </div>
+    </div>
+
+    <div id="main-site">
+        <header>
+            <div class="profile-box">
+                <div class="user-avatar" id="u-dp">📖</div>
+                <div>
+                    <div id="u-name" style="font-weight: bold;">User</div>
+                    <div id="u-id" style="font-size: 11px; opacity: 0.8;">UID: ----</div>
+                </div>
+            </div>
+            <div class="diamond-bar">💎 <span id="u-diamonds">0</span></div>
+            <div onclick="toggleSettings()" style="cursor: pointer; font-size: 24px;">⚙️</div>
+        </header>
+
+        <div id="settings-menu">
+            <div style="margin-bottom: 10px;">🔊 Sound: <button onclick="alert('Sound Toggled')">ON/OFF</button></div>
+            <div style="margin-bottom: 10px;">📧 Contact: <a href="mailto:savemoneysavelife786123@gmail.com" style="font-size: 11px;">Email Us</a></div>
+            <div style="margin-bottom: 10px;">🔗 Support: <a href="https://poweredmxa.com" target="_blank">poweredmxa</a></div>
+            <button class="btn-primary" onclick="toggleSettings()" style="padding: 5px;">Close</button>
+        </div>
+
+        <div class="grid">
+            <div class="card" onclick="loadContent('hadees')">1. Hadees<br>(50 Free)</div>
+            <div class="card" onclick="loadContent('wazu')">2. Wazu<br>Sunat/Farz</div>
+            <div class="card" onclick="loadContent('muslim')">3. Muslim<br>Farz/Sunat</div>
+            <div class="card" onclick="loadQuiz()" style="background: var(--gold); color: white; border: none;">4. Get Diamond<br>(Quran Quiz)</div>
+        </div>
+
+        <div class="card" style="margin: 0 20px; width: auto;" onclick="loadContent('shop')">🎁 Items Shop (Badge/DP)</div>
+
+        <div id="content-view">
+            <div id="display-area"></div>
+            <button class="btn-primary" onclick="closeView()" style="margin-top: 15px;">Peeche Jayein</button>
+        </div>
+    </div>
+
+    <script>
+        // --- YOUR FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d",
+            measurementId: "G-YKR7GJ8GVT"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let userData = {};
+
+        // --- AUTH & LOGIN ---
+        function startApp() {
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+            const name = document.getElementById('reg-name').value;
+
+            if(!email || !pass) { alert("Details bharein!"); return; }
+
+            auth.createUserWithEmailAndPassword(email, pass).then(res => {
+                const uid = Math.floor(1000 + Math.random() * 9000);
+                const info = { name: name, email: email, uid: uid, diamonds: 0, dp: '📖' };
+                db.ref('users/' + res.user.uid).set(info);
+                loginSuccess(info);
+            }).catch(err => {
+                auth.signInWithEmailAndPassword(email, pass).then(res => {
+                    db.ref('users/' + res.user.uid).once('value', s => loginSuccess(s.val()));
+                }).catch(e => alert("Password galat hai ya net check karein."));
+            });
+        }
+
+        function loginSuccess(data) {
+            userData = data;
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-site').style.display = 'block';
+            syncUI();
+        }
+
+        function syncUI() {
+            document.getElementById('u-name').innerText = userData.name;
+            document.getElementById('u-id').innerText = "UID: " + userData.uid;
+            document.getElementById('u-diamonds').innerText = userData.diamonds;
+            document.getElementById('u-dp').innerText = userData.dp || '📖';
+        }
+
+        // --- UI TOGGLES ---
+        function toggleSettings() {
+            const m = document.getElementById('settings-menu');
+            m.style.display = m.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function closeView() { document.getElementById('content-view').style.display = 'none'; }
+
+        // --- CONTENT LOGIC ---
+        function loadContent(type) {
+            const area = document.getElementById('display-area');
+            document.getElementById('content-view').style.display = 'block';
+            
+            if(type === 'hadees') {
+                area.innerHTML = "<h3>50 Hadees List</h3><p>1. Innamal A'malu Binniyat...</p><p>2. Al-Muslimu Man Salimal Muslimoona...</p><p>(Aap yahan mazeed add kar sakte hain)</p>";
+            } else if(type === 'wazu') {
+                area.innerHTML = "<h3>Wazu ke Faraiz</h3><ul><li>Chehra Dhona</li><li>Hath dhona</li><li>Masah</li><li>Paon dhona</li></ul>";
+            } else if(type === 'shop') {
+                area.innerHTML = `<h3>Shop</h3>
+                <div class="shop-item">🕌 DP<br>100💎<br><button onclick="buy('🕌',100)">Buy</button></div>
+                <div class="shop-item">🎖️ Badge<br>200💎<br><button onclick="buy('🎖️',200)">Buy</button></div>`;
+            }
+        }
+
+        // --- QUIZ SYSTEM ---
+        const questions = [
+            {q: "Quran mein kitni Surah hain?", a: "114"},
+            {q: "Islam ka pehla rukan kya hai?", a: "Kalma"},
+            {q: "Sabse bade Nabi koon hain?", a: "Mohammad"}
+        ];
+
+        function loadQuiz() {
+            let pick = questions[Math.floor(Math.random() * questions.length)];
+            let userAns = prompt(pick.q);
+            if(userAns && userAns.toLowerCase().includes(pick.a.toLowerCase())) {
+                alert("Sahi Jawab! +25 Diamonds");
+                updateDiamonds(25);
+            } else { alert("Galat! Sahi jawab tha: " + pick.a); }
+        }
+
+        function updateDiamonds(n) {
+            userData.diamonds += n;
+            db.ref('users/' + auth.currentUser.uid).update({ diamonds: userData.diamonds });
+            syncUI();
+        }
+
+        function buy(item, price) {
+            if(userData.diamonds >= price) {
+                userData.diamonds -= price;
+                userData.dp = item;
+                db.ref('users/' + auth.currentUser.uid).update({ diamonds: userData.diamonds, dp: item });
+                alert("Mubarak ho! Kharid liya gaya.");
+                syncUI();
+            } else { alert("Diamonds kam hain!"); }
+        }
+    </script>
+</body>
+</html>
