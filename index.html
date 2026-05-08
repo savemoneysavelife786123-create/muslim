@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌙 Islamic App</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#FFD700;--gold2:#FFA500;--dark:#0a0c14;--dark2:#111420;}
+body{background:var(--dark);color:white;font-family:'Amiri',serif;overflow-x:hidden;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(255,215,0,0.04) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(255,140,0,0.04) 0%,transparent 50%);pointer-events:none;z-index:0;}
+
+/* LOGIN */
+.login-page{height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;position:relative;z-index:1;background:linear-gradient(135deg,#0a0c14,#111420,#0d1020);}
+.login-page::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,215,0,0.015) 0px,rgba(255,215,0,0.015) 1px,transparent 1px,transparent 20px),repeating-linear-gradient(-45deg,rgba(255,215,0,0.015) 0px,rgba(255,215,0,0.015) 1px,transparent 1px,transparent 20px);pointer-events:none;}
+.login-box{width:100%;max-width:380px;padding:45px 35px;border-radius:30px;background:linear-gradient(135deg,rgba(20,22,35,0.97),rgba(15,17,28,0.97));border:1px solid rgba(255,215,0,0.25);box-shadow:0 0 60px rgba(255,215,0,0.06),0 30px 80px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,215,0,0.1);text-align:center;animation:fadeUp 0.8s ease;position:relative;overflow:hidden;}
+.login-box::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,rgba(255,215,0,0.02) 60deg,transparent 120deg,rgba(255,215,0,0.02) 180deg,transparent 240deg,rgba(255,215,0,0.02) 300deg,transparent 360deg);animation:rotate 20s linear infinite;pointer-events:none;}
+@keyframes rotate{to{transform:rotate(360deg);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.login-moon{font-size:75px;display:block;margin-bottom:8px;filter:drop-shadow(0 0 20px gold);animation:moonGlow 3s ease-in-out infinite;}
+@keyframes moonGlow{0%,100%{filter:drop-shadow(0 0 15px gold);}50%{filter:drop-shadow(0 0 40px gold) drop-shadow(0 0 60px rgba(255,165,0,0.5));}}
+.login-title{font-size:28px;font-weight:700;background:linear-gradient(135deg,#FFD700,#FFA500,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;margin-bottom:4px;}
+.login-sub{color:rgba(255,215,0,0.4);font-size:14px;margin-bottom:28px;letter-spacing:1px;}
+.login-box input{width:100%;padding:15px 20px;margin:7px 0;border:1px solid rgba(255,215,0,0.15);border-radius:14px;font-size:16px;outline:none;background:rgba(255,215,0,0.04);color:white;transition:0.3s;font-family:'Amiri',serif;text-align:right;}
+.login-box input:focus{border-color:rgba(255,215,0,0.5);background:rgba(255,215,0,0.07);box-shadow:0 0 20px rgba(255,215,0,0.08);}
+.login-box input::placeholder{color:rgba(255,255,255,0.3);}
+.btn-primary{width:100%;padding:15px;margin-top:15px;border:none;border-radius:14px;font-size:17px;background:linear-gradient(135deg,#FFD700,#FF8C00);color:#0a0c14;cursor:pointer;font-family:'Amiri',serif;font-weight:700;transition:0.3s;box-shadow:0 5px 25px rgba(255,140,0,0.3);letter-spacing:1px;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,140,0,0.5);}
+.btn-secondary{width:100%;padding:15px;margin-top:10px;border:1px solid rgba(255,215,0,0.3);border-radius:14px;font-size:17px;background:transparent;color:var(--gold);cursor:pointer;font-family:'Amiri',serif;font-weight:700;transition:0.3s;letter-spacing:1px;}
+.btn-secondary:hover{background:rgba(255,215,0,0.08);}
+
+/* APP */
+#app{display:none;position:relative;z-index:1;min-height:100vh;}
+
+/* HEADER */
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:rgba(10,12,20,0.92);backdrop-filter:blur(20px);position:sticky;top:0;z-index:99;border-bottom:1px solid rgba(255,215,0,0.12);}
+.profile-left{display:flex;align-items:center;gap:10px;}
+.profile-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#c2185b,#880e4f);border:2px solid rgba(255,100,150,0.5);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 15px rgba(194,24,91,0.4);flex-shrink:0;}
+.profile-details{display:flex;flex-direction:column;align-items:flex-start;}
+.profile-name{font-size:15px;color:white;font-weight:bold;line-height:1.2;}
+.profile-id{font-size:11px;color:rgba(255,215,0,0.6);letter-spacing:2px;font-family:monospace;}
+.logo{font-size:20px;color:var(--gold);font-weight:bold;text-shadow:0 0 15px rgba(255,215,0,0.4);white-space:nowrap;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.diamond-badge{padding:7px 14px;border-radius:20px;background:linear-gradient(135deg,rgba(0,188,212,0.2),rgba(0,96,125,0.3));border:1px solid rgba(0,188,212,0.3);font-size:14px;font-weight:bold;color:#00e5ff;white-space:nowrap;cursor:pointer;}
+.settings-btn{width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,152,0,0.15);color:#FF9800;font-size:18px;cursor:pointer;border:1px solid rgba(255,152,0,0.25);display:flex;align-items:center;justify-content:center;transition:0.3s;}
+.settings-btn:hover{background:rgba(255,152,0,0.3);}
+
+/* SETTINGS SIDEBAR */
+.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199;display:none;}
+.settings-overlay.active{display:block;}
+.settings{position:fixed;top:0;right:-280px;width:260px;height:100%;background:linear-gradient(180deg,#0d0f1e,#111420);border-left:1px solid rgba(255,215,0,0.15);padding:30px 20px;transition:0.35s cubic-bezier(0.4,0,0.2,1);z-index:200;box-shadow:-10px 0 40px rgba(0,0,0,0.5);}
+.settings.active{right:0;}
+.settings-title{font-size:20px;color:var(--gold);margin-bottom:25px;padding-bottom:15px;border-bottom:1px solid rgba(255,215,0,0.15);text-align:center;}
+.settings button,.settings a{display:block;width:100%;padding:14px;margin:8px 0;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:white;border-radius:13px;text-decoration:none;text-align:center;font-size:16px;cursor:pointer;font-family:'Amiri',serif;transition:0.2s;}
+.settings button:hover,.settings a:hover{background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.3);color:var(--gold);}
+
+/* HOME */
+.home{padding:20px 18px;display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.card{background:linear-gradient(135deg,rgba(255,215,0,0.06),rgba(255,140,0,0.03));padding:28px 12px 22px;border-radius:22px;text-align:center;backdrop-filter:blur(10px);box-shadow:0 4px 20px rgba(0,0,0,0.35);cursor:pointer;transition:0.3s cubic-bezier(0.34,1.56,0.64,1);border:1px solid rgba(255,215,0,0.1);position:relative;overflow:hidden;}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,215,0,0.4),transparent);}
+.card:hover{transform:translateY(-6px) scale(1.02);border-color:rgba(255,215,0,0.35);box-shadow:0 12px 35px rgba(255,215,0,0.12);}
+.card-icon{font-size:42px;margin-bottom:10px;display:block;filter:drop-shadow(0 0 8px rgba(255,215,0,0.3));}
+.card-title{font-size:17px;color:var(--gold);font-weight:bold;display:block;}
+.card-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;display:block;}
+
+/* SECTION */
+.section{display:none;padding:18px;animation:fadeUp 0.4s ease;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid rgba(255,215,0,0.12);}
+.back-btn{padding:9px 14px;border:1px solid rgba(255,255,255,0.12);border-radius:11px;background:rgba(255,255,255,0.05);color:white;font-size:16px;cursor:pointer;transition:0.2s;flex-shrink:0;font-family:'Amiri',serif;}
+.back-btn:hover{background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.3);}
+.section-title{font-size:22px;background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:bold;}
+
+/* HADEES */
+.hadees-diamond-bar{display:flex;align-items:center;justify-content:space-between;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.15);border-radius:16px;padding:14px 18px;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.hadees-diamond-info{font-size:15px;color:rgba(255,255,255,0.7);}
+.hadees-diamond-info span{color:#00e5ff;font-weight:bold;}
+.unlock-btn{padding:10px 18px;border:none;border-radius:12px;background:linear-gradient(135deg,#FFD700,#FF8C00);color:#0a0c14;font-size:14px;font-weight:bold;cursor:pointer;font-family:'Amiri',serif;transition:0.3s;}
+.unlock-btn:hover{box-shadow:0 5px 20px rgba(255,140,0,0.4);transform:translateY(-1px);}
+.book-scene{perspective:1500px;margin-bottom:18px;}
+.book-card{background:linear-gradient(135deg,#1a1200,#2a1e00,#1a1200);border-radius:20px;min-height:280px;padding:30px 25px;border:1px solid rgba(255,215,0,0.25);box-shadow:0 0 0 1px rgba(255,215,0,0.08),0 20px 50px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,215,0,0.15);position:relative;}
+.book-card::before{content:'';position:absolute;inset:10px;border:1px solid rgba(255,215,0,0.12);border-radius:12px;pointer-events:none;}
+.book-card::after{content:'❋';position:absolute;top:18px;right:18px;color:rgba(255,215,0,0.3);font-size:16px;}
+.book-card.flip-next{animation:flipNext 0.6s ease;}
+.book-card.flip-prev{animation:flipPrev 0.6s ease;}
+@keyframes flipNext{0%{transform:perspective(1000px) rotateY(0deg);opacity:1;}50%{transform:perspective(1000px) rotateY(-90deg);opacity:0;}51%{transform:perspective(1000px) rotateY(90deg);opacity:0;}100%{transform:perspective(1000px) rotateY(0deg);opacity:1;}}
+@keyframes flipPrev{0%{transform:perspective(1000px) rotateY(0deg);opacity:1;}50%{transform:perspective(1000px) rotateY(90deg);opacity:0;}51%{transform:perspective(1000px) rotateY(-90deg);opacity:0;}100%{transform:perspective(1000px) rotateY(0deg);opacity:1;}}
+.hadees-arabic{font-size:22px;color:var(--gold);line-height:2;text-align:center;margin-bottom:18px;text-shadow:0 0 10px rgba(255,215,0,0.3);}
+.hadees-urdu{font-size:17px;color:rgba(255,255,255,0.85);line-height:1.9;text-align:right;border-top:1px solid rgba(255,215,0,0.1);padding-top:14px;}
+.hadees-source{font-size:13px;color:rgba(255,215,0,0.5);text-align:center;margin-top:12px;letter-spacing:1px;}
+.page-indicator{text-align:center;font-size:14px;color:rgba(255,215,0,0.5);margin-bottom:14px;}
+.controls{display:flex;gap:12px;justify-content:center;}
+.ctrl-btn{flex:1;max-width:140px;padding:14px;border:1px solid rgba(255,215,0,0.25);border-radius:14px;background:rgba(255,215,0,0.08);color:var(--gold);font-size:20px;cursor:pointer;transition:0.3s;font-family:'Amiri',serif;}
+.ctrl-btn:hover{background:rgba(255,215,0,0.18);transform:scale(1.05);}
+
+/* NAMAZ / WUZU */
+.info-card{background:linear-gradient(135deg,rgba(255,215,0,0.06),rgba(255,140,0,0.03));border:1px solid rgba(255,215,0,0.15);border-radius:18px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.info-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,215,0,0.5),transparent);}
+.info-card h2{font-size:20px;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.namaz-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:17px;}
+.namaz-row:last-child{border-bottom:none;}
+.namaz-name{color:rgba(255,255,255,0.85);}
+.namaz-count{color:var(--gold2);font-weight:bold;background:rgba(255,165,0,0.1);padding:4px 12px;border-radius:20px;border:1px solid rgba(255,165,0,0.2);font-size:14px;}
+.wuzu-step{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.wuzu-num{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#0066cc,#003d7a);border:1px solid rgba(0,150,255,0.3);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;flex-shrink:0;color:#00e5ff;}
+.wuzu-text{font-size:17px;color:rgba(255,255,255,0.85);line-height:1.6;padding-top:5px;}
+
+/* TOPICS */
+.topics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px;}
+.topic-card{background:linear-gradient(135deg,rgba(255,215,0,0.06),rgba(255,140,0,0.03));border:1px solid rgba(255,215,0,0.12);border-radius:18px;padding:20px 14px;cursor:pointer;transition:0.3s;text-align:center;}
+.topic-card:hover{border-color:rgba(255,215,0,0.4);background:rgba(255,215,0,0.09);transform:translateY(-3px);}
+.topic-icon{font-size:32px;margin-bottom:8px;display:block;filter:drop-shadow(0 0 6px rgba(255,215,0,0.3));}
+.topic-name{font-size:16px;color:var(--gold);font-weight:bold;}
+.topic-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-top:3px;}
+.topic-detail{display:none;animation:fadeUp 0.3s ease;}
+.topic-content{background:linear-gradient(135deg,rgba(255,215,0,0.05),rgba(0,0,0,0.3));border:1px solid rgba(255,215,0,0.15);border-radius:18px;padding:24px;}
+.topic-content h3{font-size:20px;color:var(--gold);margin-bottom:16px;text-align:center;}
+.topic-content p{font-size:17px;color:rgba(255,255,255,0.8);line-height:2;text-align:right;}
+.topic-ayat{font-size:21px;color:var(--gold);line-height:2.2;text-align:center;margin:16px 0;padding:16px;background:rgba(255,215,0,0.04);border-radius:12px;border:1px solid rgba(255,215,0,0.1);}
+
+/* QUIZ */
+.quiz-box{background:linear-gradient(135deg,rgba(255,215,0,0.06),rgba(255,140,0,0.03));border:1px solid rgba(255,215,0,0.15);border-radius:22px;padding:25px 20px;}
+.quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.quiz-title{font-size:20px;color:var(--gold);font-weight:bold;}
+.quiz-reward{font-size:13px;color:#00e5ff;background:rgba(0,229,255,0.1);padding:5px 12px;border-radius:15px;border:1px solid rgba(0,229,255,0.2);}
+.quiz-progress{background:rgba(255,255,255,0.08);border-radius:10px;height:6px;margin-bottom:22px;overflow:hidden;}
+.quiz-progress-bar{height:100%;background:linear-gradient(90deg,#FFD700,#FF8C00);border-radius:10px;transition:width 0.5s ease;}
+.question-text{font-size:19px;color:white;text-align:right;line-height:1.8;margin-bottom:22px;padding:18px;background:rgba(255,255,255,0.04);border-radius:14px;border:1px solid rgba(255,255,255,0.07);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;}
+.quiz-opt{padding:15px 18px;border:1px solid rgba(255,215,0,0.18);border-radius:14px;background:rgba(255,215,0,0.05);color:white;font-size:17px;cursor:pointer;font-family:'Amiri',serif;text-align:right;transition:0.25s;}
+.quiz-opt:hover{background:rgba(255,215,0,0.12);border-color:rgba(255,215,0,0.4);}
+.quiz-opt.correct{background:rgba(0,200,83,0.15);border-color:#00c853;color:#69f0ae;}
+.quiz-opt.wrong{background:rgba(229,57,53,0.15);border-color:#e53935;color:#ff8a80;}
+.quiz-complete{text-align:center;padding:30px;}
+.quiz-complete-icon{font-size:60px;margin-bottom:12px;}
+.quiz-complete-text{font-size:22px;color:var(--gold);font-weight:bold;}
+.quiz-complete-sub{color:rgba(255,255,255,0.6);margin-top:8px;font-size:15px;}
+.retry-btn{margin-top:20px;padding:14px 28px;border:none;border-radius:14px;background:linear-gradient(135deg,#FFD700,#FF8C00);color:#0a0c14;font-size:17px;font-weight:bold;cursor:pointer;font-family:'Amiri',serif;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:999;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.active{display:flex;animation:fadeUp 0.3s ease;}
+.modal{background:linear-gradient(135deg,#111420,#0d1020);border:1px solid rgba(255,215,0,0.25);border-radius:25px;padding:35px 28px;max-width:340px;width:100%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,0.6);}
+.modal-icon{font-size:55px;margin-bottom:12px;}
+.modal-title{font-size:22px;color:var(--gold);font-weight:bold;margin-bottom:8px;}
+.modal-sub{color:rgba(255,255,255,0.6);font-size:15px;margin-bottom:24px;line-height:1.7;}
+.modal-btns{display:flex;gap:12px;}
+.modal-btn-yes{flex:1;padding:14px;border:none;border-radius:13px;background:linear-gradient(135deg,#FFD700,#FF8C00);color:#0a0c14;font-size:16px;font-weight:bold;cursor:pointer;font-family:'Amiri',serif;}
+.modal-btn-no{flex:1;padding:14px;border:1px solid rgba(255,255,255,0.15);border-radius:13px;background:transparent;color:white;font-size:16px;cursor:pointer;font-family:'Amiri',serif;}
+
+/* TOAST */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:linear-gradient(135deg,rgba(20,22,35,0.98),rgba(15,17,28,0.98));border:1px solid rgba(255,215,0,0.3);border-radius:16px;padding:14px 24px;font-size:16px;color:var(--gold);z-index:9999;white-space:nowrap;box-shadow:0 10px 40px rgba(0,0,0,0.5);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s;opacity:0;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-page" id="loginPage">
+  <div class="login-box">
+    <span class="login-moon">🌙</span>
+    <div class="login-title">Islamic App</div>
+    <div class="login-sub">بسم اللہ الرحمن الرحیم</div>
+    <input type="text" id="username" placeholder="👤 Username">
+    <input type="email" id="email" placeholder="📧 Email">
+    <input type="password" id="password" placeholder="🔒 Password">
+    <button class="btn-primary" onclick="signup()">✨ Account Banao</button>
+    <button class="btn-secondary" onclick="login()">🔑 Login Karo</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <header>
+    <!-- Profile LEFT -->
+    <div class="profile-left">
+      <div class="profile-avatar">❤️</div>
+      <div class="profile-details">
+        <span class="profile-name" id="profileName">User</span>
+        <span class="profile-id" id="profileId">#0000</span>
+      </div>
+    </div>
+
+    <div class="logo">🌙 Islamic</div>
+
+    <div class="header-right">
+      <div class="diamond-badge" id="diamondCount">💎 0</div>
+      <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+    </div>
+  </header>
+
+  <!-- SETTINGS SIDEBAR -->
+  <div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings()"></div>
+  <div class="settings" id="settings">
+    <div class="settings-title">⚙️ Settings</div>
+    <button onclick="logout()">🚪 Logout</button>
+    <a href="https://youtube.com/@islamki-awaz?si=8DE2PlT5xZ7MtgUc" target="_blank">❤️ Support Us</a>
+    <a href="mailto:savemoneysavelife786123@gmail.com">📧 Contact Us</a>
+  </div>
+
+  <!-- HOME -->
+  <div class="home" id="homeSection">
+    <div class="card" onclick="openSection('hadees')">
+      <span class="card-icon">📖</span>
+      <span class="card-title">Hadees</span>
+      <span class="card-sub">50 Ahadees Free</span>
+    </div>
+    <div class="card" onclick="openSection('namaz')">
+      <span class="card-icon">🕌</span>
+      <span class="card-title">Namaz</span>
+      <span class="card-sub">Rakaat Guide</span>
+    </div>
+    <div class="card" onclick="openSection('wuzu')">
+      <span class="card-icon">💧</span>
+      <span class="card-title">Wuzu</span>
+      <span class="card-sub">Tarteeb</span>
+    </div>
+    <div class="card" onclick="openSection('topics')">
+      <span class="card-icon">📚</span>
+      <span class="card-title">Topics</span>
+      <span class="card-sub">Islamic Mawzu</span>
+    </div>
+    <div class="card" onclick="openSection('mission')" style="grid-column:span 2;">
+      <span class="card-icon">💎</span>
+      <span class="card-title">Quiz Mission</span>
+      <span class="card-sub">Sahi jawab do → Diamond kmao</span>
+    </div>
+  </div>
+
+  <!-- HADEES SECTION -->
+  <div class="section" id="hadees">
+    <div class="section-header">
+      <button class="back-btn" onclick="goHome()">◀ واپس</button>
+      <span class="section-title">📖 Hadees Shareef</span>
+    </div>
+    <div class="hadees-diamond-bar">
+      <div class="hadees-diamond-info">
+        Aapke paas: <span id="hadeesUserDiamond">0</span> 💎<br>
+        <small style="color:rgba(255,255,255,0.4)">20 💎 kharch karo → 50 naye Hadees</small>
+      </div>
+      <button class="unlock-btn" onclick="unlockHadees()">🔓 Unlock<br><small>20 💎</small></button>
+    </div>
+    <div class="page-indicator" id="hadeesPage">1 / 50</div>
+    <div class="book-scene">
+      <div class="book-card" id="bookCard">
+        <div class="hadees-arabic" id="hadeesArabic"></div>
+        <div class="hadees-urdu" id="hadeesUrdu"></div>
+        <div class="hadees-source" id="hadeesSource"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="ctrl-btn" onclick="prevHadees()">◀ پچھلی</button>
+      <button class="ctrl-btn" onclick="nextHadees()">اگلی ▶</button>
+    </div>
+  </div>
+
+  <!-- NAMAZ SECTION -->
+  <div class="section" id="namaz">
+    <div class="section-header">
+      <button class="back-btn" onclick="goHome()">◀ واپس</button>
+      <span class="section-title">🕌 Namaz</span>
+    </div>
+    <div class="info-card">
+      <h2>🟡 Farz Rakaat</h2>
+      <div class="namaz-row"><span class="namaz-name">فجر</span><span class="namaz-count">2 فرض</span></div>
+      <div class="namaz-row"><span class="namaz-name">ظہر</span><span class="namaz-count">4 فرض</span></div>
+      <div class="namaz-row"><span class="namaz-name">عصر</span><span class="namaz-count">4 فرض</span></div>
+      <div class="namaz-row"><span class="namaz-name">مغرب</span><span class="namaz-count">3 فرض</span></div>
+      <div class="namaz-row"><span class="namaz-name">عشاء</span><span class="namaz-count">4 فرض</span></div>
+    </div>
+    <div class="info-card">
+      <h2>✨ Sunnat Rakaat</h2>
+      <div class="namaz-row"><span class="namaz-name">فجر</span><span class="namaz-count">2 سنت</span></div>
+      <div class="namaz-row"><span class="namaz-name">ظہر</span><span class="namaz-count">4+2 سنت</span></div>
+      <div class="namaz-row"><span class="namaz-name">مغرب</span><span class="namaz-count">2 سنت</span></div>
+      <div class="namaz-row"><span class="namaz-name">عشاء</span><span class="namaz-count">2 سنت</span></div>
+    </div>
+    <div class="info-card">
+      <h2>🌟 Witr</h2>
+      <div class="namaz-row"><span class="namaz-name">عشاء کے بعد</span><span class="namaz-count">3 وتر</span></div>
+    </div>
+  </div>
+
+  <!-- WUZU SECTION -->
+  <div class="section" id="wuzu">
+    <div class="section-header">
+      <button class="back-btn" onclick="goHome()">◀ واپس</button>
+      <span class="section-title">💧 Wuzu</span>
+    </div>
+    <div class="info-card">
+      <h2>🔵 Wuzu ke Farz</h2>
+      <div class="wuzu-step"><div class="wuzu-num">1</div><div class="wuzu-text">چہرہ دھونا</div></div>
+      <div class="wuzu-step"><div class="wuzu-num">2</div><div class="wuzu-text">دونوں ہاتھ کہنیوں سمیت دھونا</div></div>
+      <div class="wuzu-step"><div class="wuzu-num">3</div><div class="wuzu-text">سر کا مسح کرنا</div></div>
+      <div class="wuzu-step"><div class="wuzu-num">4</div><div class="wuzu-text">دونوں پاؤں ٹخنوں سمیت دھونا</div></div>
+    </div>
+    <div class="info-card">
+      <h2>✨ Wuzu ki Sunnaten</h2>
+      <div class="wuzu-step"><div class="wuzu-num">١</div><div class="wuzu-text">بسم اللہ پڑھنا</div></div>
+      <div class="wuzu-step"><div class="wuzu-num">٢</div><div class="wuzu-text">مسواک کرنا</div></div>
+      <div class="wuzu-step"><div class="wuzu-num">٣</div><div class="wuzu-text">تین تین بار دھونا</div></div>
+      <div class="wuzu-step"><div class="wuzu-num">٤</div><div class="wuzu-text">انگلیوں کا خلال کرنا</div></div>
+      <div class="wuzu-step"><div class="wuzu-num">٥</div><div class="wuzu-text">دائیں طرف سے شروع کرنا</div></div>
+    </div>
+  </div>
+
+  <!-- TOPICS SECTION -->
+  <div class="section" id="topics">
+    <div class="section-header">
+      <button class="back-btn" onclick="topicsBack()">◀ واپس</button>
+      <span class="section-title" id="topicsTitle">📚 Islamic Topics</span>
+    </div>
+    <div class="topics-grid" id="topicsGrid">
+      <div class="topic-card" onclick="openTopic(0)"><span class="topic-icon">☝️</span><div class="topic-name">Tauheed</div><div class="topic-sub">Allah ki Yagāniyat</div></div>
+      <div class="topic-card" onclick="openTopic(1)"><span class="topic-icon">🌙</span><div class="topic-name">Iman</div><div class="topic-sub">6 Arkan ul Iman</div></div>
+      <div class="topic-card" onclick="openTopic(2)"><span class="topic-icon">🕋</span><div class="topic-name">Hajj</div><div class="topic-sub">Hajj ka Tariqa</div></div>
+      <div class="topic-card" onclick="openTopic(3)"><span class="topic-icon">🌙</span><div class="topic-name">Roza</div><div class="topic-sub">Ramadan Mubarak</div></div>
+      <div class="topic-card" onclick="openTopic(4)"><span class="topic-icon">💰</span><div class="topic-name">Zakat</div><div class="topic-sub">Maal ki Pakeezgi</div></div>
+      <div class="topic-card" onclick="openTopic(5)"><span class="topic-icon">📖</span><div class="topic-name">Quran</div><div class="topic-sub">Kitab-ul-Allah</div></div>
+      <div class="topic-card" onclick="openTopic(6)"><span class="topic-icon">🤲</span><div class="topic-name">Dua</div><div class="topic-sub">Dua ki Ahmiyat</div></div>
+      <div class="topic-card" onclick="openTopic(7)"><span class="topic-icon">💫</span><div class="topic-name">Akhirat</div><div class="topic-sub">Aakhir ka Din</div></div>
+    </div>
+    <div class="topic-detail" id="topicDetail">
+      <div class="topic-content" id="topicContent"></div>
+    </div>
+  </div>
+
+  <!-- QUIZ SECTION -->
+  <div class="section" id="mission">
+    <div class="section-header">
+      <button class="back-btn" onclick="goHome()">◀ واپس</button>
+      <span class="section-title">💎 Quiz Mission</span>
+    </div>
+    <div class="quiz-box">
+      <div class="quiz-header">
+        <span class="quiz-title">Quran Quiz</span>
+        <span class="quiz-reward">+25 💎 per jawab</span>
+      </div>
+      <div class="quiz-progress"><div class="quiz-progress-bar" id="quizProgressBar" style="width:0%"></div></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-complete" id="quizComplete" style="display:none">
+        <div class="quiz-complete-icon">🎉</div>
+        <div class="quiz-complete-text">Mission Mukammal!</div>
+        <div class="quiz-complete-sub" id="quizCompleteEarned"></div>
+        <button class="retry-btn" onclick="restartQuiz()">🔄 Dobara Khelo</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end #app -->
+
+<!-- MODAL - Hadees Unlock -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-icon">💎</div>
+    <div class="modal-title">50 Naye Hadees?</div>
+    <div class="modal-sub">20 💎 kharch ho jaenge aur aapko 50 naye random Hadees milenge!</div>
+    <div class="modal-btns">
+      <button class="modal-btn-yes" onclick="confirmUnlock()">✅ Haan</button>
+      <button class="modal-btn-no" onclick="closeModal()">❌ Nahi</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ===================== FIREBASE ===================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+  authDomain:"muslim-web-59a7d.firebaseapp.com",
+  projectId:"muslim-web-59a7d",
+  storageBucket:"muslim-web-59a7d.firebasestorage.app",
+  messagingSenderId:"734164811000",
+  appId:"1:734164811000:web:2c00c92a9c3100585ecf0d"
+});
+
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+/* ---- Generate UNIQUE 4-digit ID ---- */
+/* Format: 0001 to 9999, stored in Firestore counter doc */
+async function generateUniqueId() {
+  const counterRef = doc(db, "meta", "userCounter");
+  try {
+    const snap = await getDoc(counterRef);
+    let nextId = 1;
+    if (snap.exists()) {
+      nextId = (snap.data().count || 0) + 1;
+    }
+    if (nextId > 9999) nextId = 1; // reset after 9999
+    await setDoc(counterRef, { count: nextId }, { merge: true });
+    return String(nextId).padStart(4, '0'); // "0001", "0042", "1234"
+  } catch(e) {
+    // Fallback if counter fails
+    return String(Math.floor(1 + Math.random() * 9998)).padStart(4, '0');
+  }
+}
+
+/* ---- SIGNUP ---- */
+window.signup = async function(){
+  const username = document.getElementById('username').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if(!username||!email||!password){ showToast("⚠️ Sab fields bharein"); return; }
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid  = cred.user.uid;
+    const userId = await generateUniqueId(); // ← unique sequential ID
+    await setDoc(doc(db,"users",uid), {
+      username,
+      email,
+      userId,          // e.g. "0001"
+      diamonds: 0,
+      extra_hadees: 0,
+      createdAt: Date.now()
+    });
+    showToast("✅ Account ban gaya! ID: #" + userId);
+  } catch(e) { showToast("❌ " + e.message); }
+};
+
+/* ---- LOGIN ---- */
+window.login = async function(){
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  try { await signInWithEmailAndPassword(auth, email, password); }
+  catch(e) { showToast("❌ " + e.message); }
+};
+
+/* ---- AUTH STATE + REALTIME LISTENER ---- */
+let unsubSnap = null;
+
+onAuthStateChanged(auth, (user)=>{
+  if(user){
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').style.display       = 'block';
+    window._uid = user.uid;
+
+    if(unsubSnap) unsubSnap();
+
+    // onSnapshot - koi bhi change hote hi TURANT UI update
+    unsubSnap = onSnapshot(doc(db,"users",user.uid), (snap)=>{
+      if(!snap.exists()) return;
+      const data = snap.data();
+
+      document.getElementById('profileName').textContent = data.username || "User";
+      document.getElementById('profileId').textContent   = "#" + (data.userId || "0000");
+
+      // Diamond turant update
+      updateDiamondUI(data.diamonds || 0);
+
+      // Hadees total
+      window._hadeesTotal = 50 + (data.extra_hadees || 0);
+    });
+
+  } else {
+    if(unsubSnap){ unsubSnap(); unsubSnap = null; }
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('app').style.display       = 'none';
+  }
+});
+
+/* ---- HELPERS ---- */
+function updateDiamondUI(d){
+  window._diamonds = d;
+  document.getElementById('diamondCount').innerHTML      = "💎 " + d;
+  document.getElementById('hadeesUserDiamond').textContent = d;
+}
+
+window.logout = function(){ signOut(auth); };
+
+/* ---- UNLOCK HADEES ---- */
+window.unlockHadees = function(){
+  document.getElementById('modalOverlay').classList.add('active');
+};
+window.closeModal = function(){
+  document.getElementById('modalOverlay').classList.remove('active');
+};
+window.confirmUnlock = async function(){
+  closeModal();
+  if(window._diamonds < 20){ showToast("❌ 20 💎 nahi hain!"); return; }
+  const ref = doc(db,"users",window._uid);
+  await updateDoc(ref,{ diamonds: increment(-20), extra_hadees: increment(50) });
+  window._hadeesTotal += 50;
+  updateDiamondUI(window._diamonds - 20);
+  allHadees = generateHadees(window._hadeesTotal);
+  showToast("🎉 50 naye Hadees unlock! Mubarak!");
+  showHadeesPage();
+};
+
+/* ---- QUIZ ---- */
+const quizData = [
+  {q:"Quran kis zaban mein nazil hua?",       opts:["Arabic","Urdu","Farsi","Hindi"],                                        ans:0},
+  {q:"Islam ka pehla Khalifa kaun tha?",       opts:["Hazrat Ali ؓ","Hazrat Abu Bakr ؓ","Hazrat Umar ؓ","Hazrat Usman ؓ"], ans:1},
+  {q:"Roza kis mahine mein rakhte hain?",      opts:["Shawwal","Muharram","Ramadan","Rajab"],                                ans:2},
+  {q:"Hajj kahan ada kiya jata hai?",          opts:["Madinah","Jerusalem","Makkah","Baghdad"],                             ans:2},
+  {q:"Namaz din mein kitni baar farj hai?",    opts:["3","4","5","6"],                                                      ans:2},
+  {q:"Quran mein kitni Surahs hain?",          opts:["110","114","120","100"],                                              ans:1},
+  {q:"Sabse chhoti Surah kaun si hai?",        opts:["Al-Ikhlas","Al-Asr","Al-Kausar","Al-Falaq"],                         ans:2},
+  {q:"Islam ke kitne arkan hain?",             opts:["3","4","5","6"],                                                      ans:2},
+  {q:"Sabse bari Surah kaun si hai?",          opts:["Al-Baqarah","Al-Imran","Al-Nisa","Al-Maidah"],                       ans:0},
+  {q:"Quran mein kitne Siparay hain?",         opts:["20","25","30","35"],                                                  ans:2},
+];
+
+let qIdx=0, qEarned=0, qAnswered=false;
+
+window.initQuiz = function(){
+  qIdx=0; qEarned=0; qAnswered=false;
+  document.getElementById('quizComplete').style.display  = 'none';
+  document.getElementById('quizOptions').style.display   = 'flex';
+  document.getElementById('questionText').style.display  = 'block';
+  renderQ();
+};
+
+function renderQ(){
+  if(qIdx >= quizData.length){ endQuiz(); return; }
+  qAnswered = false;
+  const q = quizData[qIdx];
+  document.getElementById('quizProgressBar').style.width = ((qIdx / quizData.length)*100) + "%";
+  document.getElementById('questionText').textContent    = "Q"+(qIdx+1)+". "+q.q;
+  const container = document.getElementById('quizOptions');
+  container.innerHTML = '';
+  q.opts.forEach((o,i)=>{
+    const btn = document.createElement('button');
+    btn.className   = 'quiz-opt';
+    btn.textContent = ["A","B","C","D"][i] + ") " + o;
+    btn.onclick = () => selectAns(i, btn);
+    container.appendChild(btn);
+  });
+}
+
+window.selectAns = async function(i, btn){
+  if(qAnswered) return;
+  qAnswered = true;
+  const q   = quizData[qIdx];
+  const all = document.querySelectorAll('.quiz-opt');
+
+  // Always highlight correct answer green
+  all[q.ans].classList.add('correct');
+
+  if(i === q.ans){
+    qEarned += 25;
+    showToast("✅ Sahi! +25 💎");
+    // ---- FIX: add diamond to Firestore AND update UI ----
+    try {
+      const ref = doc(db,"users",window._uid);
+      await updateDoc(ref,{ diamonds: increment(25) });
+      updateDiamondUI(window._diamonds + 25);
+    } catch(e){ console.error(e); }
+  } else {
+    btn.classList.add('wrong');
+    showToast("❌ Galat Jawab");
+  }
+
+  setTimeout(()=>{ qIdx++; renderQ(); }, 1300);
+};
+
+function endQuiz(){
+  document.getElementById('quizProgressBar').style.width = '100%';
+  document.getElementById('questionText').style.display  = 'none';
+  document.getElementById('quizOptions').style.display   = 'none';
+  document.getElementById('quizComplete').style.display  = 'block';
+  document.getElementById('quizCompleteEarned').textContent = "Aapne " + qEarned + " 💎 kamaye!";
+}
+
+window.restartQuiz = function(){ initQuiz(); };
+
+/* ---- TOAST ---- */
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2600);
+}
+window.showToast = showToast;
+
+/* Sab functions define hone ke baad hadees dikhao */
+showHadeesPage();
+
+</script><!-- end Firebase module -->
+
+<!-- ===================== APP JS ===================== -->
+<script>
+
+/* ======== HADEES DATA - 50 Real Ahadees ======== */
+const hadeesBase = [
+  {ar:"إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ", ur:"اعمال کا دارومدار نیتوں پر ہے۔", src:"صحیح بخاری"},
+  {ar:"الدِّينُ النَّصِيحَةُ", ur:"دین خیرخواہی کا نام ہے۔", src:"مسلم"},
+  {ar:"خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ", ur:"تم میں سے بہترین وہ ہے جو قرآن سیکھے اور سکھائے۔", src:"بخاری"},
+  {ar:"الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ", ur:"مسلمان وہ ہے جس کی زبان اور ہاتھ سے دوسرے مسلمان محفوظ رہیں۔", src:"بخاری"},
+  {ar:"أَحَبُّ الأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ", ur:"اللہ کے نزدیک سب سے پسندیدہ عمل وہ ہے جو ہمیشہ کیا جائے چاہے تھوڑا ہو۔", src:"بخاری"},
+  {ar:"الطَّهُورُ شَطْرُ الإِيمَانِ", ur:"پاکیزگی نصف ایمان ہے۔", src:"مسلم"},
+  {ar:"مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُت", ur:"جو اللہ اور قیامت کے دن پر ایمان رکھتا ہو وہ اچھی بات کہے یا خاموش رہے۔", src:"بخاری"},
+  {ar:"لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ", ur:"تم میں سے کوئی اس وقت تک مؤمن نہیں جب تک اپنے بھائی کے لیے وہ نہ چاہے جو اپنے لیے چاہتا ہے۔", src:"بخاری"},
+  {ar:"الصَّلاَةُ عِمَادُ الدِّينِ", ur:"نماز دین کا ستون ہے۔", src:"بیہقی"},
+  {ar:"مَنْ صَمَتَ نَجَا", ur:"جو خاموش رہا وہ نجات پا گیا۔", src:"ترمذی"},
+  {ar:"خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ", ur:"سب سے بہتر انسان وہ ہے جو لوگوں کے لیے سب سے زیادہ نفع بخش ہو۔", src:"طبرانی"},
+  {ar:"الْجَنَّةُ تَحْتَ أَقْدَامِ الأُمَّهَاتِ", ur:"جنت ماؤں کے قدموں تلے ہے۔", src:"نسائی"},
+  {ar:"اتَّقِ اللَّهَ حَيْثُمَا كُنْتَ", ur:"جہاں بھی ہو اللہ سے ڈرتے رہو۔", src:"ترمذی"},
+  {ar:"الْمُؤْمِنُ مِرْآةُ الْمُؤْمِنِ", ur:"مؤمن مؤمن کا آئینہ ہے۔", src:"ابوداؤد"},
+  {ar:"الْكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ", ur:"اچھی بات کہنا صدقہ ہے۔", src:"بخاری"},
+  {ar:"التَّائِبُ مِنْ الذَّنْبِ كَمَنْ لاَ ذَنْبَ لَهُ", ur:"گناہ سے توبہ کرنے والا ایسا ہے جیسے اس نے گناہ کیا ہی نہ ہو۔", src:"ابن ماجہ"},
+  {ar:"مَنْ لاَ يَشْكُرُ النَّاسَ لاَ يَشْكُرُ اللَّهَ", ur:"جو لوگوں کا شکریہ نہیں کرتا وہ اللہ کا بھی شکر نہیں کرتا۔", src:"ترمذی"},
+  {ar:"الدُّعَاءُ مُخُّ الْعِبَادَةِ", ur:"دعا عبادت کا مغز ہے۔", src:"ترمذی"},
+  {ar:"اقْرَءُوا الْقُرْآنَ فَإِنَّهُ يَأْتِي يَوْمَ الْقِيَامَةِ شَفِيعًا", ur:"قرآن پڑھو کیونکہ یہ قیامت کے دن سفارشی بن کر آئے گا۔", src:"مسلم"},
+  {ar:"الصَّبْرُ نِصْفُ الإِيمَانِ", ur:"صبر نصف ایمان ہے۔", src:"بیہقی"},
+  {ar:"الْحَيَاءُ مِنَ الإِيمَانِ", ur:"شرم ایمان سے ہے۔", src:"بخاری"},
+  {ar:"تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ صَدَقَةٌ", ur:"اپنے بھائی کے چہرے پر مسکرانا صدقہ ہے۔", src:"ترمذی"},
+  {ar:"مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ طَرِيقًا إِلَى الْجَنَّةِ", ur:"جو علم کی تلاش میں راستہ چلے اللہ اس کے لیے جنت کا راستہ آسان کر دیتا ہے۔", src:"مسلم"},
+  {ar:"إِنَّ اللَّهَ يُحِبُّ إِذَا عَمِلَ أَحَدُكُمْ عَمَلاً أَنْ يُتْقِنَهُ", ur:"اللہ پسند کرتا ہے کہ جب تم کوئی کام کرو تو اسے پورے طور پر کرو۔", src:"بیہقی"},
+  {ar:"إِذَا مَاتَ الإِنْسَانُ انْقَطَعَ عَنْهُ عَمَلُهُ إِلاَّ مِنْ ثَلاَثَةٍ", ur:"جب انسان مرتا ہے تو تین چیزوں کے سوا سب کٹ جاتا ہے: صدقہ جاریہ، علم جس سے نفع ہو، نیک اولاد۔", src:"مسلم"},
+  {ar:"إِنَّ مَعَ الْعُسْرِ يُسْرًا", ur:"بے شک تکلیف کے ساتھ آسانی ہے۔", src:"الانشراح:6"},
+  {ar:"أَلاَ بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ", ur:"خبردار! اللہ کے ذکر سے دل اطمینان پاتے ہیں۔", src:"الرعد:28"},
+  {ar:"وَاللَّهُ يُحِبُّ الصَّابِرِينَ", ur:"اور اللہ صبر کرنے والوں سے محبت کرتا ہے۔", src:"آل عمران:146"},
+  {ar:"مَنْ يُرِدِ اللَّهُ بِهِ خَيْرًا يُفَقِّهْهُ فِي الدِّينِ", ur:"اللہ جس کے ساتھ بھلائی چاہتا ہے اسے دین کی سمجھ دیتا ہے۔", src:"بخاری"},
+  {ar:"إِنَّ الصِّدْقَ يَهْدِي إِلَى الْبِرِّ وَإِنَّ الْبِرَّ يَهْدِي إِلَى الْجَنَّةِ", ur:"سچائی نیکی کی طرف لے جاتی ہے اور نیکی جنت کی طرف۔", src:"بخاری"},
+  {ar:"كُنْ فِي الدُّنْيَا كَأَنَّكَ غَرِيبٌ أَوْ عَابِرُ سَبِيلٍ", ur:"دنیا میں ایسے رہو جیسے تم مسافر ہو۔", src:"بخاری"},
+  {ar:"لاَ تَغْضَبْ وَلَكَ الْجَنَّةُ", ur:"غصہ مت کرو اور تمہارے لیے جنت ہے۔", src:"طبرانی"},
+  {ar:"أَحَبُّ الْبِلاَدِ إِلَى اللَّهِ مَسَاجِدُهَا", ur:"اللہ کو سب سے محبوب جگہیں مساجد ہیں۔", src:"مسلم"},
+  {ar:"مَنْ حَافَظَ عَلَى الصَّلَوَاتِ الْخَمْسِ كَانَ لَهُ نُورٌ يَوْمَ الْقِيَامَةِ", ur:"جو پانچ نمازوں کی پابندی کرے اس کے لیے قیامت کے دن نور ہوگا۔", src:"احمد"},
+  {ar:"أَكْمَلُ الْمُؤْمِنِينَ إِيمَانًا أَحْسَنُهُمْ خُلُقًا", ur:"ایمان والوں میں سب سے کامل ایمان اس کا ہے جس کے اخلاق سب سے اچھے ہیں۔", src:"ترمذی"},
+  {ar:"لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الْغَضَبِ", ur:"طاقتور وہ نہیں جو پہلوانی میں جیتے بلکہ وہ ہے جو غصے میں اپنے آپ کو قابو رکھے۔", src:"بخاری"},
+  {ar:"إِنَّ اللَّهَ رَفِيقٌ يُحِبُّ الرِّفْقَ فِي الأَمْرِ كُلِّهِ", ur:"بے شک اللہ نرم خو ہے اور ہر معاملے میں نرمی کو پسند کرتا ہے۔", src:"بخاری"},
+  {ar:"رَبِّ زِدْنِي عِلْمًا", ur:"اے میرے رب! مجھے علم میں اضافہ فرما۔", src:"طہ:114"},
+  {ar:"حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ", ur:"ہمیں اللہ کافی ہے اور وہ بہترین کارساز ہے۔", src:"آل عمران:173"},
+  {ar:"إِنَّ اللَّهَ مَعَ الصَّابِرِينَ", ur:"بے شک اللہ صبر کرنے والوں کے ساتھ ہے۔", src:"البقرة:153"},
+  {ar:"وَعَسَى أَنْ تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَكُمْ", ur:"شاید تم کسی چیز کو ناپسند کرو اور وہ تمہارے لیے بہتر ہو۔", src:"البقرة:216"},
+  {ar:"وَمَنْ يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ", ur:"جو اللہ پر بھروسہ کرے اللہ اس کے لیے کافی ہے۔", src:"الطلاق:3"},
+  {ar:"كُلُّ بِدْعَةٍ ضَلاَلَةٌ وَكُلُّ ضَلاَلَةٍ فِي النَّارِ", ur:"ہر بدعت گمراہی ہے اور ہر گمراہی جہنم کی طرف لے جاتی ہے۔", src:"مسلم"},
+  {ar:"خَيْرُ الذِّكْرِ الْخَفِيُّ", ur:"سب سے بہتر ذکر پوشیدہ ذکر ہے۔", src:"احمد"},
+  {ar:"مَنْ قَرَأَ آيَةَ الْكُرْسِيِّ دُبُرَ كُلِّ صَلاَةٍ مَكْتُوبَةٍ", ur:"جو ہر فرض نماز کے بعد آیت الکرسی پڑھے اسے جنت میں جانے سے موت کے سوا کچھ نہیں روکتا۔", src:"نسائی"},
+  {ar:"مَنْ صَامَ رَمَضَانَ إِيمَانًا وَاحْتِسَابًا غُفِرَ لَهُ مَا تَقَدَّمَ مِنْ ذَنْبِهِ", ur:"جو ایمان اور ثواب کی نیت سے رمضان کے روزے رکھے اس کے پچھلے گناہ معاف ہو جاتے ہیں۔", src:"بخاری"},
+  {ar:"سُبْحَانَ اللَّهِ وَبِحَمْدِهِ سُبْحَانَ اللَّهِ الْعَظِيمِ", ur:"یہ دو کلمے زبان پر ہلکے لیکن میزان میں بھاری ہیں۔", src:"بخاری"},
+  {ar:"مَنْ لاَ يَرْحَمُ لاَ يُرْحَمُ", ur:"جو رحم نہیں کرتا اس پر رحم نہیں کیا جاتا۔", src:"بخاری"},
+  {ar:"أَفْضَلُ الصَّدَقَةِ أَنْ تَصَدَّقَ وَأَنْتَ صَحِيحٌ شَحِيحٌ", ur:"سب سے افضل صدقہ وہ ہے جو تندرستی اور بخیلی کی حالت میں دیا جائے۔", src:"بخاری"},
+  {ar:"إِنَّ اللَّهَ جَمِيلٌ يُحِبُّ الْجَمَالَ", ur:"بے شک اللہ خوبصورت ہے اور خوبصورتی کو پسند کرتا ہے۔", src:"مسلم"},
+];
+
+/* ======== TOPICS ======== */
+const topicsData = [
+  {name:"Tauheed",icon:"☝️",title:"توحید - اللہ کی یگانگت",ayat:"لَا إِلَهَ إِلَّا اللَّهُ مُحَمَّدٌ رَسُولُ اللَّهِ",text:"توحید اسلام کی بنیاد ہے۔ اس کا مطلب ہے کہ صرف ایک اللہ ہے اس کا کوئی شریک نہیں۔ وہی پیدا کرنے والا، رزق دینے والا اور مارنے والا ہے۔ توحید کے تین حصے ہیں: توحید ربوبیت، توحید الوہیت اور توحید اسماء و صفات۔"},
+  {name:"Iman",icon:"🌙",title:"ایمان کے چھ ارکان",ayat:"آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ",text:"1. اللہ پر ایمان ☝️\n2. فرشتوں پر ایمان 👼\n3. کتابوں پر ایمان 📖\n4. رسولوں پر ایمان 🌟\n5. قیامت کے دن پر ایمان ⚖️\n6. تقدیر خیر و شر پر ایمان 📋"},
+  {name:"Hajj",icon:"🕋",title:"حج - اسلام کا پانچواں رکن",ayat:"وَلِلَّهِ عَلَى النَّاسِ حِجُّ الْبَيْتِ مَنِ اسْتَطَاعَ إِلَيْهِ سَبِيلاً",text:"حج ہر صاحب استطاعت مسلمان پر زندگی میں ایک بار فرض ہے۔ ذوالحجہ میں ادا کیا جاتا ہے۔ ارکان: احرام، طواف، سعی، وقوف عرفہ اور قربانی۔"},
+  {name:"Roza",icon:"🌙",title:"رمضان اور روزہ",ayat:"يَا أَيُّهَا الَّذِينَ آمَنُوا كُتِبَ عَلَيْكُمُ الصِّيَامُ",text:"رمضان المبارک اسلامی سال کا نواں مہینہ ہے۔ روزہ صبح صادق سے غروب آفتاب تک فرض ہے۔ اس مہینے میں لیلۃ القدر ہوتی ہے جو ہزار مہینوں سے بہتر ہے۔"},
+  {name:"Zakat",icon:"💰",title:"زکوٰۃ - مال کی پاکیزگی",ayat:"وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ",text:"زکوٰۃ اسلام کا تیسرا رکن ہے۔ نصاب کو پہنچنے والے مال پر ڈھائی فیصد زکوٰۃ فرض ہے۔ فقراء، مساکین اور دیگر مستحقین کو دی جاتی ہے۔"},
+  {name:"Quran",icon:"📖",title:"قرآن کریم - کتاب اللہ",ayat:"إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ",text:"قرآن کریم اللہ کا آخری کلام ہے۔ اس میں 114 سورتیں اور 6236 آیات ہیں۔ ہر حرف پر دس نیکیاں ملتی ہیں۔ یہ کتاب قیامت تک محفوظ رہے گی۔"},
+  {name:"Dua",icon:"🤲",title:"دعا کی اہمیت",ayat:"ادْعُونِي أَسْتَجِبْ لَكُمْ",text:"دعا عبادت کا مغز ہے۔ اللہ نے فرمایا مجھ سے مانگو میں قبول کروں گا۔ آداب دعا: وضو، قبلہ رخ، حمد و صلوٰۃ کے بعد، پورے یقین کے ساتھ مانگیں۔"},
+  {name:"Akhirat",icon:"💫",title:"آخرت کا یقین",ayat:"كُلُّ نَفْسٍ ذَائِقَةُ الْمَوْتِ",text:"ہر جان کو موت آنی ہے۔ موت کے بعد قبر کی زندگی پھر قیامت کا دن۔ اعمال کے مطابق جنت یا جہنم کا فیصلہ ہوگا۔ نیک اعمال ہی آخرت کی تیاری ہے۔"},
+];
+
+/* ======== HADEES ENGINE ======== */
+let allHadees = [], curIdx = 0, currentTopicView = 'grid';
+
+function generateHadees(count){
+  const shuffled = [...hadeesBase].sort(()=> Math.random() - 0.5);
+  const arr = [];
+  for(let i=0; i<count; i++) arr.push(shuffled[i % shuffled.length]);
+  return arr;
+}
+
+/* Hadees pehle se load karo */
+allHadees = generateHadees(50);
+curIdx    = 0;
+
+window.initHadees = function(){
+  const total = window._hadeesTotal || 50;
+  if(total > allHadees.length){
+    allHadees = generateHadees(total);
+    curIdx    = 0;
+  }
+  showHadeesPage();
+};
+
+window.showHadeesPage = function(){
+  const h = allHadees[curIdx];
+  if(!h) return;
+  document.getElementById('hadeesArabic').textContent  = h.ar;
+  document.getElementById('hadeesUrdu').textContent    = h.ur;
+  document.getElementById('hadeesSource').textContent  = "— " + h.src;
+  document.getElementById('hadeesPage').textContent    = (curIdx+1) + " / " + allHadees.length;
+  document.getElementById('hadeesUserDiamond').textContent = window._diamonds || 0;
+};
+
+/* Page flip sound using WebAudio */
+function playFlip(){
+  try{
+    const ctx = new(window.AudioContext || window.webkitAudioContext)();
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+    const d   = buf.getChannelData(0);
+    for(let i=0; i<d.length; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/d.length, 3) * 0.5;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.4, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    src.connect(g); g.connect(ctx.destination); src.start();
+  } catch(e){}
+}
+
+function flipCard(dir){
+  playFlip();
+  const card = document.getElementById('bookCard');
+  card.classList.remove('flip-next','flip-prev');
+  void card.offsetWidth; // reflow
+  card.classList.add(dir === 'next' ? 'flip-next' : 'flip-prev');
+  setTimeout(()=>{
+    showHadeesPage();
+    card.classList.remove('flip-next','flip-prev');
+  }, 300);
+}
+
+window.nextHadees = function(){
+  if(curIdx < allHadees.length - 1){ curIdx++; flipCard('next'); }
+  else showToast("آخری حدیث ہے");
+};
+window.prevHadees = function(){
+  if(curIdx > 0){ curIdx--; flipCard('prev'); }
+  else showToast("پہلی حدیث ہے");
+};
+
+/* ======== TOPICS ======== */
+window.openTopic = function(i){
+  const t = topicsData[i];
+  currentTopicView = 'detail';
+  document.getElementById('topicsGrid').style.display   = 'none';
+  document.getElementById('topicDetail').style.display  = 'block';
+  document.getElementById('topicsTitle').textContent    = t.icon + " " + t.name;
+  document.getElementById('topicContent').innerHTML =
+    `<h3>${t.title}</h3><div class="topic-ayat">${t.ayat}</div><p>${t.text.replace(/\n/g,'<br>')}</p>`;
+};
+
+window.topicsBack = function(){
+  if(currentTopicView === 'detail'){
+    currentTopicView = 'grid';
+    document.getElementById('topicsGrid').style.display  = 'grid';
+    document.getElementById('topicDetail').style.display = 'none';
+    document.getElementById('topicsTitle').textContent   = '📚 Islamic Topics';
+  } else { goHome(); }
+};
+
+/* ======== NAVIGATION ======== */
+window.openSection = function(id){
+  document.getElementById('homeSection').style.display = 'none';
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+  if(id === 'mission') initQuiz();
+  if(id === 'hadees')  showHadeesPage();
+  if(id === 'topics'){
+    currentTopicView = 'grid';
+    document.getElementById('topicsGrid').style.display  = 'grid';
+    document.getElementById('topicDetail').style.display = 'none';
+    document.getElementById('topicsTitle').textContent   = '📚 Islamic Topics';
+  }
+};
+
+window.goHome = function(){
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+  document.getElementById('homeSection').style.display = 'grid';
+};
+
+window.toggleSettings = function(){
+  document.getElementById('settings').classList.toggle('active');
+  document.getElementById('settingsOverlay').classList.toggle('active');
+};
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2600);
+}
+window.showToast = showToast;
+
+/* Sab functions define hone ke baad hadees dikhao */
+showHadeesPage();
+
+</script>
+</body>
+</html>
