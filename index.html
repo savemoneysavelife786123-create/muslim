@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌙 Islamic App</title>
+
+<style>
+body{
+margin:0;
+font-family:sans-serif;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
+}
+
+.login-page, #app{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+}
+
+.login-box{
+background:rgba(255,255,255,0.1);
+padding:25px;
+border-radius:20px;
+width:300px;
+text-align:center;
+}
+
+input,button{
+width:100%;
+padding:12px;
+margin:8px 0;
+border-radius:10px;
+border:none;
+}
+
+button{
+background:orange;
+color:white;
+cursor:pointer;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+padding:10px;
+background:rgba(0,0,0,0.3);
+}
+
+.card{
+background:rgba(255,255,255,0.1);
+padding:20px;
+margin:10px;
+border-radius:15px;
+cursor:pointer;
+}
+
+.section{display:none;padding:20px;}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="login-page" id="loginPage">
+
+<div class="login-box">
+
+<h2>🌙 Islamic App</h2>
+
+<input id="username" placeholder="Username">
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="signup()">Signup</button>
+<button onclick="login()">Login</button>
+
+</div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+<header>
+<div>🌙 Islamic App</div>
+<div id="diamond">💎 0</div>
+</header>
+
+<div class="card" onclick="openSection('home')">🏠 Home</div>
+<div class="card" onclick="openSection('quiz')">🎁 Quiz</div>
+
+<!-- QUIZ -->
+<div class="section" id="quiz">
+
+<h3 id="question">Q1. Quran kis zabaan me nazil hua?</h3>
+
+<button onclick="checkAnswer('A')">Arabic</button>
+<button onclick="checkAnswer('B')">English</button>
+<button onclick="checkAnswer('C')">Urdu</button>
+
+</div>
+
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } 
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+authDomain: "muslim-web-59a7d.firebaseapp.com",
+projectId: "muslim-web-59a7d",
+storageBucket: "muslim-web-59a7d.firebasestorage.app",
+messagingSenderId: "734164811000",
+appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUserData = null;
+
+/* 🔥 SIGNUP WITH UNIQUE 4 DIGIT ID */
+window.signup = async function(){
+
+const username = document.getElementById("username").value;
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
+
+try{
+
+const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+const uid = userCredential.user.uid;
+
+/* UNIQUE 4 DIGIT ID */
+let userId;
+let exists = true;
+
+while(exists){
+
+userId = Math.floor(1000 + Math.random()*9000);
+
+const checkRef = doc(db,"userIds",String(userId));
+const snap = await getDoc(checkRef);
+
+if(!snap.exists()){
+exists = false;
+await setDoc(checkRef,{uid:uid});
+}
+
+}
+
+await setDoc(doc(db,"users",uid),{
+username,
+email,
+userId,
+diamonds:0,
+createdAt:Date.now()
+});
+
+alert("Account Created ID: " + userId);
+
+}catch(e){
+alert(e.message);
+}
+
+}
+
+/* LOGIN */
+window.login = async function(){
+
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
+
+try{
+await signInWithEmailAndPassword(auth,email,password);
+}catch(e){
+alert(e.message);
+}
+
+}
+
+/* AUTO LOGIN */
+onAuthStateChanged(auth, async (user)=>{
+
+if(user){
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById("app").style.display="block";
+
+const snap = await getDoc(doc(db,"users",user.uid));
+
+if(snap.exists()){
+currentUserData = snap.data();
+document.getElementById("diamond").innerText = "💎 " + currentUserData.diamonds;
+}
+
+}else{
+document.getElementById("loginPage").style.display="flex";
+document.getElementById("app").style.display="none";
+}
+
+});
+
+/* QUIZ */
+window.checkAnswer = async function(ans){
+
+if(!auth.currentUser) return;
+
+if(ans === "A"){
+
+await updateDoc(doc(db,"users",auth.currentUser.uid),{
+diamonds: increment(25)
+});
+
+const snap = await getDoc(doc(db,"users",auth.currentUser.uid));
+document.getElementById("diamond").innerText = "💎 " + snap.data().diamonds;
+
+alert("✅ +25 Diamonds");
+
+}else{
+alert("❌ Wrong Answer");
+}
+
+}
+
+/* NAV */
+window.openSection = function(id){
+
+document.querySelectorAll(".section").forEach(s=>s.style.display="none");
+
+const el = document.getElementById(id);
+if(el) el.style.display="block";
+
+}
+
+</script>
+
+</body>
+</html>
