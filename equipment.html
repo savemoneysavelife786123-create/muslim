@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Equipment | Testing</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        :root { --gold: #f3ba2f; --bg: #050505; --panel: #111; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; padding: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .back-btn { color: var(--gold); text-decoration: none; font-weight: bold; }
+        .section-title { color: var(--gold); font-size: 12px; letter-spacing: 1px; margin: 20px 0 10px; text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .item-card { background: var(--panel); border: 1px solid #222; border-radius: 12px; padding: 15px; text-align: center; }
+        .item-card h2 { margin: 0; font-size: 30px; }
+        .equip-btn { width: 100%; margin-top: 10px; padding: 5px; border-radius: 5px; border: none; background: var(--gold); color: black; font-weight: bold; font-size: 10px; cursor: pointer; }
+        .active-item { border: 2px solid var(--gold); background: rgba(243,186,47,0.1); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="lobby.html" class="back-btn">❮ BACK</a>
+        <b style="letter-spacing:1px;">MY EQUIPMENT</b>
+        <div></div>
+    </div>
+
+    <div id="equip-content">
+        </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        auth.onAuthStateChanged(user => {
+            if (!user) window.location.href = "index.html";
+            else {
+                db.ref('players/' + user.uid).on('value', snap => {
+                    renderInventory(snap.val());
+                });
+            }
+        });
+
+        function renderInventory(data) {
+            const container = document.getElementById('equip-content');
+            container.innerHTML = '';
+            const categories = ['avatars', 'banners', 'badges'];
+
+            categories.forEach(cat => {
+                const items = data.inventory[cat] || [];
+                if(items.length > 0) {
+                    let html = `<div class="section-title">${cat}</div><div class="grid">`;
+                    items.forEach(val => {
+                        const isEquipped = (data[cat.slice(0, -1)] === val);
+                        html += `
+                            <div class="item-card ${isEquipped ? 'active-item' : ''}">
+                                <h2>${val}</h2>
+                                <button class="equip-btn" onclick="equip('${cat.slice(0, -1)}', '${val}')">
+                                    ${isEquipped ? 'EQUIPPED' : 'SELECT'}
+                                </button>
+                            </div>`;
+                    });
+                    html += `</div>`;
+                    container.innerHTML += html;
+                }
+            });
+        }
+
+        function equip(type, val) {
+            db.ref('players/' + auth.currentUser.uid).update({ [type]: val });
+        }
+    </script>
+</body>
+</html>
