@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Muslim Pro V17 - Auth Fixed</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --bg: #090b10; --panel: #161b22; --gold: #f3ba2f; --blue: #1f6feb; --text: #e6edf3; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+        #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-card { background: var(--panel); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; border: 1px solid #30363d; }
+        .inp { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #30363d; background: #0d1117; color: white; outline: none; }
+
+        .screen { display: none; padding: 20px; padding-bottom: 90px; min-height: 100vh; }
+        .active-screen { display: block; animation: fadeIn 0.3s ease; }
+
+        .profile-card { position: relative; border-radius: 20px; padding: 40px 20px; text-align: center; border: 3px solid #30363d; margin-bottom: 20px; overflow: hidden; background: #1c2128; }
+        .banner-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 150px; opacity: 0.2; z-index: 0; pointer-events: none; }
+        .profile-content { position: relative; z-index: 1; }
+        .p-avatar { width: 90px; height: 90px; border-radius: 50%; background: white; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 45px; border: 3px solid var(--gold); }
+
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .item-box { background: var(--panel); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #30363d; }
+        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-gold { background: var(--gold); color: #000; }
+        .btn-blue { background: var(--blue); color: #fff; }
+        .owned { background: #2d333b !important; color: #555 !important; }
+        
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--panel); display: flex; border-top: 1px solid #30363d; height: 70px; z-index: 1000; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #8b949e; cursor: pointer; }
+        .nav-btn.active { color: var(--gold); border-top: 2px solid var(--gold); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h1 style="color:var(--gold); margin-bottom:20px;">MUSLIM PRO</h1>
+            <input type="email" id="email" class="inp" placeholder="Email Address">
+            <input type="password" id="password" class="inp" placeholder="Password">
+            <button onclick="handleAuth()" class="btn btn-gold" id="auth-btn">CONTINUE</button>
+            <p id="auth-msg" style="font-size: 11px; color: #8b949e; margin-top: 15px;">Logging in or creating account...</p>
+        </div>
+    </div>
+
+    <div id="deen-screen" class="screen">
+        <h2 style="color:var(--gold)">Islamic Guidance</h2>
+        <div class="item-box" style="border: 1px solid var(--gold); padding: 20px;">
+            <p id="hadees-text">"Actions are judged by intentions."</p>
+            <button onclick="nextHadees()" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:5px 10px; border-radius:15px; font-size:11px;">NEXT</button>
+        </div>
+        <button onclick="getAdDiamonds()" class="btn btn-gold">📺 GET +20 DIAMONDS</button>
+    </div>
+
+    <div id="lobby-screen" class="screen">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+            <b>MY PROFILE</b>
+            <span style="color:var(--gold)">💎 <span id="v-diamonds">0</span></span>
+        </div>
+        <div class="profile-card">
+            <div class="banner-overlay" id="v-banner-bg">🇸🇦</div>
+            <div class="profile-content">
+                <div class="p-avatar" id="v-dp">👤</div>
+                <h2 id="v-name">Player</h2>
+                <div style="font-size:12px; opacity:0.6;">UID: <span id="v-uid">0000</span></div>
+            </div>
+        </div>
+        <button onclick="auth.signOut().then(()=>location.reload())" style="background:none; color:#8b949e; border:1px solid #333; width:100%; padding:10px; border-radius:10px;">Switch Account</button>
+    </div>
+
+    <div id="store-screen" class="screen">
+        <h2 style="color:var(--gold)">Shop</h2>
+        <div id="store-render"></div>
+    </div>
+
+    <div id="equip-screen" class="screen">
+        <h2 style="color:var(--blue)">Inventory</h2>
+        <div id="inventory-render"></div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-btn" onclick="tab('deen-screen', this)">📖 Deen</div>
+        <div class="nav-btn" onclick="tab('lobby-screen', this)">🏠 Lobby</div>
+        <div class="nav-btn" onclick="tab('store-screen', this)">🛒 Store</div>
+        <div class="nav-btn" onclick="tab('equip-screen', this)">🎒 Equip</div>
+    </nav>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let uData = null;
+
+        const shopItems = {
+            DP: ["🦁","🦅","🐯","🐉","🔥","💎","🌟","⚔️","👑","🎮","🧿","☪️","🕋","🕌"],
+            BANNER: ["🇸🇦","🇵🇰","🏴","🚩","🌈","🌊","❄️","✨","🌙","🕋","🕌"],
+            BADGE: ["🥇","🥈","🥉","🏆","🎖️","🏅","🚀","⚡","🔥"]
+        };
+
+        // FIXED AUTH LOGIC
+        async function handleAuth() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            const btn = document.getElementById('auth-btn');
+            if(!e || !p) return alert("Email aur Password zaruri hai!");
+
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            try {
+                // Try Login
+                await auth.signInWithEmailAndPassword(e, p);
+            } catch (err) {
+                // If user doesn't exist, Create Account
+                if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+                    try {
+                        const res = await auth.createUserWithEmailAndPassword(e, p);
+                        await db.ref('users/' + res.user.uid).set({
+                            name: "User_" + Math.floor(100+Math.random()*899),
+                            diamonds: 500,
+                            dp: '👤',
+                            banner: '🇸🇦',
+                            uid: Math.floor(1000 + Math.random() * 9000),
+                            inventory: ['👤', '🇸🇦']
+                        });
+                    } catch (sErr) { alert("Signup Failed: " + sErr.message); }
+                } else { alert("Error: " + err.message); }
+            }
+            btn.innerText = "CONTINUE";
+            btn.disabled = false;
+        }
+
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                document.getElementById('auth-screen').style.display = 'none';
+                tab('lobby-screen', document.querySelectorAll('.nav-btn')[1]);
+                db.ref('users/'+user.uid).on('value', s => {
+                    uData = s.val();
+                    if(uData) {
+                        if(uData.isBanned) { alert("ACCOUNT BANNED!"); auth.signOut(); location.reload(); }
+                        refreshUI();
+                    }
+                });
+            }
+        });
+
+        function refreshUI() {
+            document.getElementById('v-name').innerText = uData.name;
+            document.getElementById('v-diamonds').innerText = uData.diamonds;
+            document.getElementById('v-dp').innerText = uData.dp;
+            document.getElementById('v-uid').innerText = uData.uid;
+            document.getElementById('v-banner-bg').innerText = uData.banner;
+
+            let sHtml = '';
+            for(let cat in shopItems) {
+                sHtml += `<h4 style="color:var(--gold); margin:15px 0 5px;">${cat}</h4><div class="grid">`;
+                shopItems[cat].forEach(item => {
+                    let owned = (uData.inventory || []).includes(item);
+                    sHtml += `<div class="item-box"><h3>${item}</h3><button onclick="buy('${item}')" class="btn btn-gold ${owned?'owned':''}" ${owned?'disabled':''}>${owned?'OWNED':'300 💎'}</button></div>`;
+                });
+                sHtml += `</div>`;
+            }
+            document.getElementById('store-render').innerHTML = sHtml;
+
+            let iHtml = '';
+            for(let cat in shopItems) {
+                let mine = (uData.inventory || []).filter(i => shopItems[cat].includes(i));
+                if(mine.length > 0) {
+                    iHtml += `<h4 style="color:var(--blue); margin:15px 0 5px;">My ${cat}s</h4><div class="grid">`;
+                    mine.forEach(item => {
+                        iHtml += `<div class="item-box"><h3>${item}</h3><button onclick="equip('${item}', '${cat}')" class="btn btn-blue">EQUIP</button></div>`;
+                    });
+                    iHtml += `</div>`;
+                }
+            }
+            document.getElementById('inventory-render').innerHTML = iHtml || "<p style='text-align:center;'>Go to store to buy items!</p>";
+        }
+
+        function buy(item) {
+            if(uData.diamonds >= 300) {
+                let inv = uData.inventory || [];
+                if(!inv.includes(item)) {
+                    inv.push(item);
+                    db.ref('users/'+auth.currentUser.uid).update({ diamonds: uData.diamonds - 300, inventory: inv });
+                }
+            } else { alert("Diamonds kam hain!"); }
+        }
+
+        function equip(item, cat) {
+            let key = cat.toLowerCase();
+            db.ref('users/'+auth.currentUser.uid).update({ [key]: item });
+        }
+
+        function getAdDiamonds() {
+            window.open('https://pl29384318.profitablecpmratenetwork.com/35/57/7f/35577f1a0d6a720c6ba42103062b9527.js', '_blank');
+            setTimeout(() => {
+                db.ref('users/'+auth.currentUser.uid+'/diamonds').transaction(d => (d||0)+20);
+                alert("Success! 20 Diamonds added.");
+            }, 5000);
+        }
+
+        function tab(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active-screen');
+            el.classList.add('active');
+        }
+
+        const hadeesList = ["Actions are judged by intentions.", "Modesty is part of faith.", "The best among you is best to his family."];
+        function nextHadees() {
+            document.getElementById('hadees-text').innerText = hadeesList[Math.floor(Math.random()*hadeesList.length)];
+        }
+    </script>
+</body>
+</html>
