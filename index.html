@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Muslim Pro V8 - Inventory System</title>
+
+    <script src="https://pl29384318.profitablecpmratenetwork.com/35/57/7f/35577f1a0d6a720c6ba42103062b9527.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --bg: #090c10; --panel: #161b22; --gold: #f3ba2f; --green: #238636; --blue: #1f6feb; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; background: var(--bg); color: white; -webkit-tap-highlight-color: transparent; }
+
+        /* Auth Section */
+        #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-card { background: var(--panel); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; border: 1px solid #30363d; }
+        .inp { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #30363d; background: #0d1117; color: white; }
+
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--panel); display: flex; border-top: 1px solid #30363d; z-index: 1000; height: 70px; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #8b949e; cursor: pointer; }
+        .nav-btn.active { color: var(--gold); }
+
+        /* Screens */
+        .screen { display: none; padding: 15px; padding-bottom: 90px; min-height: 100vh; animation: fadeIn 0.3s; }
+        .active-screen { display: block; }
+
+        /* Profile & Lobby */
+        .profile-card { border-radius: 25px; padding: 30px; text-align: center; border: 4px solid #fff; margin-top: 10px; position: relative; transition: 0.3s; }
+        .p-img { width: 100px; height: 100px; border-radius: 50%; background: white; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 50px; border: 3px solid #fff; }
+        .badge-box { position: absolute; bottom: 70px; right: 35%; background: var(--gold); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--panel); font-size: 14px; }
+
+        /* Store & Inventory Grid */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .item-card { background: var(--panel); border-radius: 15px; padding: 15px; text-align: center; border: 1px solid #30363d; }
+        .item-emoji { font-size: 40px; display: block; margin-bottom: 10px; }
+        .btn-buy { width: 100%; padding: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; background: var(--gold); color: black; }
+        .btn-equip { width: 100%; padding: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; background: var(--blue); color: white; }
+        
+        .section-title { margin: 20px 0 10px; font-size: 18px; color: var(--gold); border-left: 4px solid var(--gold); padding-left: 10px; }
+        .diamond-count { background: rgba(243, 186, 47, 0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold); color: var(--gold); font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h2 style="color:var(--gold)">MUSLIM PRO V8</h2>
+            <input type="email" id="email" class="inp" placeholder="Email">
+            <input type="password" id="password" class="inp" placeholder="Password">
+            <button onclick="handleAuth()" style="width:100%; padding:15px; border-radius:10px; border:none; background:var(--gold); font-weight:bold; margin-top:10px;">LOGIN / SIGNUP</button>
+        </div>
+    </div>
+
+    <div id="lobby-screen" class="screen active-screen">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span>LOBBY OFFICIAL</span>
+            <div class="diamond-count">💎 <span id="v-diamonds">0</span></div>
+        </div>
+
+        <div class="profile-card" id="v-banner" style="background:#1c2128;">
+            <div class="p-img" id="v-dp">👤</div>
+            <div class="badge-box" id="v-badge">🎖️</div>
+            <h2 id="v-name" style="margin:15px 0 5px;">Player</h2>
+            <div style="font-size:12px; opacity:0.6;">UID: <span id="v-uid">0000</span></div>
+        </div>
+
+        <button onclick="watchAd()" style="width:100%; padding:18px; background:linear-gradient(to right, #f3ba2f, #f0932b); border:none; border-radius:15px; font-weight:bold; margin:20px 0; color:black;">📺 WATCH AD (+20 💎)</button>
+        
+        <div style="background:var(--panel); padding:20px; border-radius:20px; text-align:center; border:1px solid #30363d;">
+            <h3>Online Friends</h3>
+            <p style="color:#8b949e; font-size:13px;">Invite friends to earn bonus diamonds!</p>
+            <button onclick="navigator.share({url: window.location.href})" style="color:var(--gold); background:none; border:none; font-weight:bold;">INVITE NOW</button>
+        </div>
+    </div>
+
+    <div id="store-screen" class="screen">
+        <h2>Global Store</h2>
+        <div class="diamond-count" style="display:inline-block; margin-bottom:10px;">My Balance: 💎 <span id="s-diamonds">0</span></div>
+        
+        <div id="store-list">
+            </div>
+        
+        <button onclick="buyDiamonds()" style="width:100%; padding:15px; background:var(--green); color:white; border:none; border-radius:12px; margin-top:20px; font-weight:bold;">💰 BUY 500 DIAMONDS (₹100)</button>
+    </div>
+
+    <div id="equip-screen" class="screen">
+        <h2>My Equipment</h2>
+        <p style="color:#8b949e; font-size:13px;">Items you have purchased. Click to equip.</p>
+        
+        <div class="section-title">Purchased DPs</div>
+        <div id="my-dps" class="grid"></div>
+
+        <div class="section-title">Purchased Banners</div>
+        <div id="my-banners" class="grid"></div>
+
+        <div class="section-title">Purchased Badges</div>
+        <div id="my-badges" class="grid"></div>
+    </div>
+
+    <div id="settings-screen" class="screen">
+        <h2>Settings</h2>
+        <div class="item-card" style="text-align:left;">
+            <label>Change Name (Cost: 20 💎)</label>
+            <input type="text" id="new-name" class="inp" placeholder="New Username">
+            <button onclick="changeName()" class="btn-equip" style="margin-top:10px;">UPDATE NAME</button>
+        </div>
+        <button onclick="auth.signOut(); location.reload();" style="width:100%; margin-top:30px; background:none; border:none; color:red; font-weight:bold;">LOGOUT</button>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-btn active" onclick="tab('lobby-screen', this)"><span>🏠</span>Lobby</div>
+        <div class="nav-btn" onclick="tab('store-screen', this)"><span>🛒</span>Store</div>
+        <div class="nav-btn" onclick="tab('equip-screen', this)"><span>🎒</span>Equip</div>
+        <div class="nav-btn" onclick="tab('settings-screen', this)"><span>⚙️</span>Settings</div>
+    </nav>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let uData = null;
+
+        // Store Items Database
+        const shopItems = {
+            dp: ["✖️","👁️‍🗨️","7️⃣","*️⃣","5️⃣","8️⃣","🔡","🆙","ℹ️","↘️","☑️","🈯","💲","⏹️","🕢","🕠","📩","📨","🏷️","📑","📝","🖊️","💸","🖱️","📞","🎱","🧧"],
+            banner: ["🇵🇰","🇸🇦","🇺🇳","🏴󠁧󠁢󠁷󠁬󠁳󠁿","🗺️","🧫","📙","🗄️","📒","📔","📕","📓","📚","🗓️","🇧🇳","🇧🇫","🇧🇮","🇨🇩","🇨🇺","🇨🇴","🇩🇯","🇩🇿","🇧🇷","🇨🇨"],
+            badge: ["🏆","🎖️","🏅","🥇","🥈","🎗️","🎊","🔮"]
+        };
+
+        function handleAuth() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            if(!e || !p) return alert("Details bhariye!");
+            auth.signInWithEmailAndPassword(e,p).catch(() => {
+                auth.createUserWithEmailAndPassword(e,p).then(res => {
+                    db.ref('users/'+res.user.uid).set({
+                        name:"Player", diamonds:100, dp:'👤', banner:'#1c2128', badge:'🎖️', uid:Math.floor(1000+Math.random()*8999),
+                        inventory: { dps:["👤"], banners:["#1c2128"], badges:["🎖️"] }
+                    });
+                });
+            });
+        }
+
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                document.getElementById('auth-screen').style.display='none';
+                load(user.uid);
+            }
+        });
+
+        function load(uid) {
+            db.ref('users/'+uid).on('value', s => {
+                uData = s.val();
+                if(uData) {
+                    renderUI();
+                    renderStore();
+                    renderInventory();
+                }
+            });
+        }
+
+        function renderUI() {
+            document.getElementById('v-name').innerText = uData.name;
+            document.getElementById('v-diamonds').innerText = uData.diamonds;
+            document.getElementById('s-diamonds').innerText = uData.diamonds;
+            document.getElementById('v-dp').innerText = uData.dp;
+            document.getElementById('v-badge').innerText = uData.badge;
+            document.getElementById('v-uid').innerText = uData.uid;
+            document.getElementById('v-banner').style.background = uData.banner.startsWith('#') ? uData.banner : 'var(--panel)';
+            if(!uData.banner.startsWith('#')) document.getElementById('v-banner').innerHTML += `<div style="position:absolute; top:10px; left:10px; font-size:30px;">${uData.banner}</div>`;
+        }
+
+        function renderStore() {
+            let html = '';
+            for(let cat in shopItems) {
+                html += `<div class="section-title">Buy ${cat.toUpperCase()}s (300 💎)</div><div class="grid">`;
+                shopItems[cat].forEach(item => {
+                    let owned = uData.inventory && uData.inventory[cat+'s'] && uData.inventory[cat+'s'].includes(item);
+                    html += `
+                        <div class="item-card">
+                            <span class="item-emoji">${item}</span>
+                            <button class="btn-buy" ${owned?'disabled style="opacity:0.5"':''} onclick="buy('${item}','${cat}')">
+                                ${owned ? 'OWNED' : 'BUY'}
+                            </button>
+                        </div>`;
+                });
+                html += `</div>`;
+            }
+            document.getElementById('store-list').innerHTML = html;
+        }
+
+        function renderInventory() {
+            const cats = { dps:'my-dps', banners:'my-banners', badges:'my-badges' };
+            for(let key in cats) {
+                let html = '';
+                if(uData.inventory && uData.inventory[key]) {
+                    uData.inventory[key].forEach(item => {
+                        html += `
+                            <div class="item-card">
+                                <span class="item-emoji">${item}</span>
+                                <button class="btn-equip" onclick="equip('${item}','${key}')">EQUIP</button>
+                            </div>`;
+                    });
+                }
+                document.getElementById(cats[key]).innerHTML = html;
+            }
+        }
+
+        function buy(item, cat) {
+            if(uData.diamonds >= 300) {
+                let inv = uData.inventory || { dps:[], banners:[], badges:[] };
+                if(!inv[cat+'s']) inv[cat+'s'] = [];
+                inv[cat+'s'].push(item);
+                
+                db.ref('users/'+auth.currentUser.uid).update({
+                    diamonds: uData.diamonds - 300,
+                    inventory: inv
+                });
+                alert("Purchased! Check 'Equip' section.");
+            } else alert("Diamonds kam hain!");
+        }
+
+        function equip(item, key) {
+            let type = key === 'dps' ? 'dp' : (key === 'banners' ? 'banner' : 'badge');
+            db.ref('users/'+auth.currentUser.uid).update({ [type]: item });
+            alert("Equipped Successfully!");
+        }
+
+        function watchAd() {
+            alert("Ad Load Ho Raha Hai...");
+            window.open("https://pl29384318.profitablecpmratenetwork.com/35/57/7f/35577f1a0d6a720c6ba42103062b9527.js", "_blank");
+            setTimeout(() => {
+                db.ref('users/'+auth.currentUser.uid+'/diamonds').transaction(d => (d||0)+20);
+                alert("Mubarak! +20 Diamonds added.");
+            }, 5000);
+        }
+
+        function changeName() {
+            let n = document.getElementById('new-name').value;
+            if(n && uData.diamonds >= 20) {
+                db.ref('users/'+auth.currentUser.uid).update({ name: n, diamonds: uData.diamonds - 20 });
+                alert("Name Updated!");
+            } else alert("Need 20 Diamonds!");
+        }
+
+        function tab(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active-screen');
+            el.classList.add('active');
+        }
+
+        function buyDiamonds() { window.open("https://wa.me/919541329658?text=I want to buy diamonds. UID:"+uData.uid); }
+    </script>
+</body>
+</html>
