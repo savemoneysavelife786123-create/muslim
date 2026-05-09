@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Game Lobby</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --gold: #f3ba2f; --panel: #111; }
+        body { margin: 0; background: #050505; color: white; font-family: 'Segoe UI', sans-serif; }
+        
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--panel); border-bottom: 1px solid #222; }
+        .user-card { display: flex; align-items: center; gap: 10px; }
+        .avatar-circle { width: 50px; height: 50px; background: #222; border: 2px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        
+        .stats { font-size: 14px; }
+        .stats b { color: var(--gold); display: block; font-size: 16px; }
+        .stats span { color: #888; font-size: 11px; }
+
+        .diamond-box { background: #000; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--gold); color: var(--gold); font-weight: bold; }
+
+        .main-menu { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-btn { background: var(--panel); border: 1px solid #222; padding: 20px; border-radius: 15px; text-align: center; text-decoration: none; color: white; transition: 0.3s; }
+        .menu-btn:active { transform: scale(0.95); background: #1a1a1a; }
+        .menu-btn i { display: block; font-size: 30px; margin-bottom: 10px; }
+
+        .logout-btn { margin: 20px; padding: 10px; background: #ff4444; color: white; border: none; border-radius: 10px; width: calc(100% - 40px); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="user-card">
+            <div class="avatar-circle" id="u-avatar">👤</div>
+            <div class="stats">
+                <b id="u-name">Loading...</b>
+                <span id="u-id">ID: 000000</span>
+            </div>
+        </div>
+        <div class="diamond-box">💎 <span id="u-diamonds">0</span></div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <div id="u-character" style="font-size: 100px;">🧍</div>
+        <div id="u-badge" style="font-size: 20px; margin-top: -20px;">🎖️</div>
+    </div>
+
+    <div class="main-menu">
+        <a href="store.html" class="menu-btn"><i>🛒</i> STORE</a>
+        <a href="profile.html" class="menu-btn"><i>👤</i> PROFILE</a>
+        <a href="inventory.html" class="menu-btn"><i>🎒</i> ITEMS</a>
+        <a href="settings.html" class="menu-btn"><i>⚙️</i> SETTINGS</a>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">LOGOUT</button>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // --- MAIN LOGIC: Data Fetching ---
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User login hai, ab database se data khudh uthayega
+                db.ref('players/' + user.uid).on('value', (snap) => {
+                    const data = snap.val();
+                    if (data) {
+                        // Sare values update ho rahi hain yahan
+                        document.getElementById('u-name').innerText = data.username || "Warrior";
+                        document.getElementById('u-diamonds').innerText = data.diamonds || 0;
+                        document.getElementById('u-id').innerText = "ID: " + (data.uid || "000000");
+                        document.getElementById('u-avatar').innerText = data.avatar || "👤";
+                        document.getElementById('u-character').innerText = data.character || "🧍";
+                        document.getElementById('u-badge').innerText = data.badge || "🎖️";
+                    } else {
+                        // Agar user auth mein hai par database mein entry nahi hui
+                        console.error("No database record found!");
+                    }
+                });
+            } else {
+                // Agar login nahi hai toh wapis index page par
+                window.location.href = "index.html";
+            }
+        });
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = "index.html";
+            });
+        }
+    </script>
+</body>
+</html>
