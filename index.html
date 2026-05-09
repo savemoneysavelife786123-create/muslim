@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Testing | Google Login</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --primary: #4285F4; --bg: #050505; --text: #ffffff; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+
+        .login-card { text-align: center; width: 85%; max-width: 400px; padding: 40px 20px; border-radius: 30px; background: #111; border: 1px solid #222; }
+        h1 { font-size: 32px; letter-spacing: 3px; margin: 0; color: #fff; text-transform: uppercase; }
+        .tagline { font-size: 13px; color: #666; margin-bottom: 50px; }
+
+        .google-btn {
+            width: 100%; padding: 16px; border-radius: 15px; border: none; background: white; color: #000;
+            font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+            gap: 12px; cursor: pointer; transition: 0.2s;
+        }
+        .google-btn:active { transform: scale(0.95); }
+        .google-icon { width: 22px; height: 22px; }
+
+        #status { display: none; margin-top: 20px; font-size: 12px; color: var(--primary); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h1>TESTING</h1>
+        <p class="tagline">AUTHENTICATION SYSTEM v2.0</p>
+
+        <button class="google-btn" onclick="loginWithGoogle()">
+            <img class="google-icon" src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png">
+            Continue with Google
+        </button>
+
+        <div id="status">Connecting to satellite...</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        function loginWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            document.getElementById('status').style.display = "block";
+
+            auth.signInWithPopup(provider).then((result) => {
+                handleUser(result.user);
+            }).catch((error) => {
+                alert("Login Error: " + error.message);
+                document.getElementById('status').style.display = "none";
+            });
+        }
+
+        function handleUser(user) {
+            const userRef = db.ref('players/' + user.uid);
+            
+            userRef.once('value').then((snap) => {
+                if (snap.exists()) {
+                    const data = snap.val();
+                    // Agar username nahi hai to setup par bhejo, warna lobby
+                    if (!data.username) {
+                        window.location.href = "lobby.html?setup=true";
+                    } else {
+                        window.location.href = "lobby.html";
+                    }
+                } else {
+                    // NAYE USER KA INITIAL DATA (Diamonds Yahan Set Honge)
+                    userRef.set({
+                        email: user.email,
+                        diamonds: 0, // Starting Diamonds
+                        avatar: "👤",
+                        banner: "🚩",
+                        badge: "🎖️",
+                        character: "🧍",
+                        uid: Math.floor(100000 + Math.random() * 900000),
+                        inventory: {
+                            avatars: ["👤"],
+                            banners: ["🚩"],
+                            badges: ["🎖️"],
+                            characters: ["🧍"]
+                        }
+                    }).then(() => {
+                        window.location.href = "lobby.html?setup=true";
+                    });
+                }
+            });
+        }
+
+        // Auto-redirect if logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) { handleUser(user); }
+        });
+    </script>
+</body>
+</html>
