@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Characters | Testing</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        :root { --gold: #f3ba2f; --bg: #050505; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
+        .back-btn { color: var(--gold); text-decoration: none; font-size: 20px; }
+        .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .char-card { background: #111; border: 1px solid #222; border-radius: 20px; padding: 20px; text-align: center; }
+        .char-card h1 { font-size: 80px; margin: 10px 0; }
+        .use-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #333; color: white; font-weight: bold; }
+        .active { background: var(--gold); color: black; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="lobby.html" class="back-btn">❮</a>
+        <h2 style="margin:0; letter-spacing:1px;">CHARACTERS</h2>
+    </div>
+
+    <div id="char-list" class="char-grid"></div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                db.ref('players/' + user.uid).on('value', snap => {
+                    const data = snap.val();
+                    const list = document.getElementById('char-list');
+                    list.innerHTML = '';
+                    
+                    const myChars = data.inventory.characters || [];
+                    myChars.forEach(c => {
+                        const isCurrent = (data.character === c);
+                        list.innerHTML += `
+                            <div class="char-card" style="${isCurrent ? 'border-color:var(--gold)' : ''}">
+                                <h1>${c}</h1>
+                                <button class="use-btn ${isCurrent ? 'active' : ''}" onclick="setChar('${c}')">
+                                    ${isCurrent ? 'SELECTED' : 'EQUIP'}
+                                </button>
+                            </div>`;
+                    });
+                });
+            }
+        });
+
+        function setChar(c) {
+            db.ref('players/' + auth.currentUser.uid).update({ character: c });
+        }
+    </script>
+</body>
+</html>
