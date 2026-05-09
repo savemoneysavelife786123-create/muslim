@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Battle Web | Secure Login</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        :root { --gold: #f3ba2f; --bg: #050505; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-box { background: #111; padding: 30px; border-radius: 20px; border: 1px solid #222; text-align: center; width: 85%; max-width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        h1 { color: var(--gold); letter-spacing: 3px; margin-bottom: 5px; }
+        p { color: #666; font-size: 13px; margin-bottom: 25px; }
+        input { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 12px; border: 1px solid #333; background: #000; color: white; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--gold); }
+        .btn { background: var(--gold); color: black; padding: 14px; width: 100%; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .toggle-btn { margin-top: 20px; font-size: 13px; color: #888; cursor: pointer; }
+        .toggle-btn span { color: var(--gold); font-weight: bold; }
+        #error-msg { margin-top: 15px; color: #ff4444; font-size: 12px; display: none; background: rgba(255,68,68,0.1); padding: 10px; border-radius: 8px; }
+        
+        /* Loading Spinner */
+        #loader { display: none; margin-top: 15px; }
+        .spinner { border: 3px solid #333; border-top: 3px solid var(--gold); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h1 id="title">SIGN UP</h1>
+        <p id="sub-title">Create your warrior account</p>
+
+        <div id="signup-fields">
+            <input type="text" id="username" placeholder="Username (Unique Name)">
+        </div>
+        
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password (Min 6 Characters)">
+        
+        <button class="btn" id="btn-text" onclick="handleAuth()">Create Account</button>
+        
+        <div id="loader"><div class="spinner"></div></div>
+        <div id="error-msg"></div>
+
+        <div class="toggle-btn" onclick="toggleForm()" id="toggle-text">
+            Already have an account? <span>Login</span>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration (Same as yours)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let isLoginMode = false;
+
+        // Form toggle logic
+        function toggleForm() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('title').innerText = isLoginMode ? "LOGIN" : "SIGN UP";
+            document.getElementById('sub-title').innerText = isLoginMode ? "Welcome back, Warrior!" : "Create your warrior account";
+            document.getElementById('btn-text').innerText = isLoginMode ? "Login Now" : "Create Account";
+            document.getElementById('toggle-text').innerHTML = isLoginMode ? "New Player? <span>Sign Up</span>" : "Already have an account? <span>Login</span>";
+            document.getElementById('signup-fields').style.display = isLoginMode ? "none" : "block";
+            document.getElementById('error-msg').style.display = "none";
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            const userN = document.getElementById('username').value.trim();
+            const errorBox = document.getElementById('error-msg');
+            const loader = document.getElementById('loader');
+
+            if(!email || !pass) {
+                showError("Please fill all fields!");
+                return;
+            }
+
+            errorBox.style.display = "none";
+            loader.style.display = "block";
+
+            try {
+                if (isLoginMode) {
+                    // --- LOGIN LOGIC ---
+                    await auth.signInWithEmailAndPassword(email, pass);
+                    window.location.href = "lobby.html";
+                } else {
+                    // --- SIGNUP LOGIC ---
+                    if (userN.length < 3) throw new Error("Username must be 3+ characters!");
+                    
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+                    const user = userCredential.user;
+                    
+                    // Generate 6 Digit Numeric ID
+                    const sixDigitID = Math.floor(100000 + Math.random() * 900000);
+
+                    // User ka sara data database mein save karein
+                    await db.ref('players/' + user.uid).set({
+                        username: userN,
+                        email: email,
+                        diamonds: 1000,
+                        avatar: "👤",
+                        banner: "🚩",
+                        badge: "🎖️",
+                        character: "🧍",
+                        uid: sixDigitID, 
+                        inventory: {
+                            avatars: ["👤"],
+                            banners: ["🚩"],
+                            badges: ["🎖️"],
+                            characters: ["🧍"]
+                        }
+                    });
+                    
+                    console.log("Account Created Successfully!");
+                    window.location.href = "lobby.html";
+                }
+            } catch (error) {
+                loader.style.display = "none";
+                showError(error.message);
+            }
+        }
+
+        function showError(text) {
+            const errorBox = document.getElementById('error-msg');
+            errorBox.innerText = text;
+            errorBox.style.display = "block";
+        }
+
+        // Auto-redirect if already logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Check if we are not already going to lobby
+                if(!window.location.href.includes("lobby.html")) {
+                    window.location.href = "lobby.html";
+                }
+            }
+        });
+    </script>
+</body>
+</html>
