@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Muslim Pro V10 - Mega App</title>
+
+    <script type='text/javascript' src='//pl29384318.profitablecpmratenetwork.com/35/57/7f/35577f1a0d6a720c6ba42103062b9527.js'></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --bg: #0d1117; --panel: #161b22; --gold: #f3ba2f; --green: #238636; --blue: #1f6feb; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; background: var(--bg); color: white; -webkit-tap-highlight-color: transparent; }
+
+        /* Auth Screen */
+        #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-card { background: var(--panel); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; border: 1px solid #30363d; }
+        .inp { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #30363d; background: #0d1117; color: white; outline: none; }
+
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--panel); display: flex; border-top: 1px solid #30363d; z-index: 1000; height: 70px; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #8b949e; cursor: pointer; }
+        .nav-btn.active { color: var(--gold); }
+
+        /* Screens */
+        .screen { display: none; padding: 15px; padding-bottom: 90px; min-height: 100vh; animation: fadeIn 0.3s; }
+        .active-screen { display: block; }
+
+        /* Components */
+        .card { background: var(--panel); padding: 15px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 15px; }
+        .profile-card { border-radius: 25px; padding: 25px; text-align: center; border: 4px solid #fff; margin-bottom: 15px; position: relative; }
+        .p-img { width: 80px; height: 80px; border-radius: 50%; background: white; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 40px; border: 3px solid #fff; }
+        .badge-box { position: absolute; bottom: 65px; right: 35%; background: var(--gold); width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--panel); font-size: 12px; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-gold { background: var(--gold); color: black; }
+        .btn-blue { background: var(--blue); color: white; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h2 style="color:var(--gold)">MUSLIM PRO V10</h2>
+            <input type="email" id="email" class="inp" placeholder="Email">
+            <input type="password" id="password" class="inp" placeholder="Password">
+            <button onclick="handleAuth()" class="btn btn-gold">LOGIN / SIGNUP</button>
+        </div>
+    </div>
+
+    <div id="home-screen" class="screen active-screen">
+        <h2 style="color:var(--gold)">Daily Deen</h2>
+        <div class="card">
+            <h3 style="margin-top:0">📖 Quran Ayat</h3>
+            <p id="quran-text" style="font-style: italic;">Loading...</p>
+        </div>
+        <div class="card">
+            <h3 style="margin-top:0">📜 Daily Hadith</h3>
+            <p id="hadith-text">Loading...</p>
+        </div>
+        <button onclick="watchAd()" class="btn btn-gold" style="padding:15px; font-size:16px;">📺 WATCH AD (+20 💎)</button>
+    </div>
+
+    <div id="lobby-screen" class="screen">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <span>LOBBY</span>
+            <span style="color:var(--gold)">💎 <span id="v-diamonds">0</span></span>
+        </div>
+        <div class="profile-card" id="v-banner" style="background:#1c2128;">
+            <div class="p-img" id="v-dp">👤</div>
+            <div class="badge-box" id="v-badge">🎖️</div>
+            <h2 id="v-name" style="margin:10px 0 0;">Player</h2>
+            <div style="font-size:12px; opacity:0.6;">UID: <span id="v-uid">0</span></div>
+        </div>
+
+        <div class="card">
+            <h4>Add Friend by UID</h4>
+            <div style="display:flex; gap:5px;">
+                <input type="number" id="f-uid" class="inp" style="margin:0" placeholder="UID">
+                <button onclick="addFriend()" class="btn btn-blue" style="width:80px">ADD</button>
+            </div>
+            <div id="friend-list" style="margin-top:10px; font-size:13px;"></div>
+        </div>
+    </div>
+
+    <div id="store-screen" class="screen">
+        <h2>Grand Store</h2>
+        <div id="store-content"></div>
+        <button onclick="window.open('https://wa.me/919541329658')" class="btn" style="background:var(--green); color:white; margin-top:20px; padding:15px;">💰 TOPUP DIAMONDS</button>
+    </div>
+
+    <div id="equip-screen" class="screen">
+        <h2>My Inventory</h2>
+        <div id="my-inventory" class="grid"></div>
+    </div>
+
+    <div id="settings-screen" class="screen">
+        <h2>Settings</h2>
+        <div class="card">
+            <label>Rename Account (Cost: 20 💎)</label>
+            <input type="text" id="new-name" class="inp" placeholder="New Name">
+            <button onclick="changeName()" class="btn btn-blue" style="margin-top:5px;">CHANGE NAME</button>
+        </div>
+        <button onclick="auth.signOut(); location.reload();" style="color:red; background:none; border:none; width:100%; margin-top:20px; font-weight:bold;">LOGOUT</button>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-btn active" onclick="tab('home-screen', this)">📖 Deen</div>
+        <div class="nav-btn" onclick="tab('lobby-screen', this)">🏠 Lobby</div>
+        <div class="nav-btn" onclick="tab('store-screen', this)">🛒 Store</div>
+        <div class="nav-btn" onclick="tab('equip-screen', this)">🎒 Equip</div>
+        <div class="nav-btn" onclick="tab('settings-screen', this)">⚙️ Settings</div>
+    </nav>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let uData = null;
+
+        const shopItems = {
+            dp: ["✖️","👁️‍🗨️","7️⃣","*️⃣","5️⃣","8️⃣","🔡","🆙","ℹ️","↘️","☑️","🈯","💲","⏹️","🕢","🕠","📩","📨","🏷️","📑","📝","🖊️","💸","🖱️","📞","🎱","🧧"],
+            banner: ["🇵🇰","🇸🇦","🇺🇳","🏴󠁧󠁢󠁷󠁬󠁳󠁿","🗺️","🧫","📙","🗄️","📒","📔","📕","📓","📚","🗓️","🇧🇳","🇧🇫","🇧🇮","🇨🇩","🇨🇺","🇨🇴","🇩🇯","🇩🇿","🇧🇷","🇨🇨"],
+            badge: ["🏆","🎖️","🏅","🥇","🥈","🎗️","🎊","🔮"]
+        };
+
+        function handleAuth() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            if(!e || !p) return alert("Fill fields!");
+            auth.signInWithEmailAndPassword(e,p).catch(() => {
+                auth.createUserWithEmailAndPassword(e,p).then(res => {
+                    db.ref('users/'+res.user.uid).set({
+                        name:"Player", diamonds:100, dp:'👤', banner:'#1c2128', badge:'🎖️', uid:Math.floor(10000+Math.random()*89999),
+                        inventory: ["👤", "#1c2128", "🎖️"], friends: []
+                    });
+                });
+            });
+        }
+
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                document.getElementById('auth-screen').style.display='none';
+                db.ref('users/'+user.uid).on('value', s => {
+                    uData = s.val();
+                    if(uData) refreshUI();
+                });
+                loadDeen();
+            }
+        });
+
+        function loadDeen() {
+            fetch('https://api.alquran.cloud/v1/ayah/random/en.asad').then(r=>r.json()).then(d => {
+                document.getElementById('quran-text').innerText = d.data.text + " (Surah " + d.data.surah.englishName + ")";
+            });
+            document.getElementById('hadith-text').innerText = "Prophet (PBUH) said: 'The best among you are those who learn the Quran and teach it.' (Sahih Bukhari)";
+        }
+
+        function refreshUI() {
+            document.getElementById('v-name').innerText = uData.name;
+            document.getElementById('v-diamonds').innerText = uData.diamonds;
+            document.getElementById('v-dp').innerText = uData.dp;
+            document.getElementById('v-badge').innerText = uData.badge;
+            document.getElementById('v-uid').innerText = uData.uid;
+            document.getElementById('v-banner').style.background = uData.banner.startsWith('#') ? uData.banner : '#1c2128';
+
+            // Store
+            let sHtml = '';
+            for(let cat in shopItems) {
+                sHtml += `<h4 style="color:var(--gold)">Buy ${cat}s (300 💎)</h4><div class="grid">`;
+                shopItems[cat].forEach(item => {
+                    let owned = uData.inventory.includes(item);
+                    sHtml += `<div class="card" style="text-align:center"><span style="font-size:30px">${item}</span>
+                    <button onclick="buy('${item}')" class="btn btn-gold" style="margin-top:5px" ${owned?'disabled':''}>${owned?'OWNED':'BUY'}</button></div>`;
+                });
+                sHtml += `</div>`;
+            }
+            document.getElementById('store-content').innerHTML = sHtml;
+
+            // Inventory
+            let iHtml = '';
+            uData.inventory.forEach(item => {
+                iHtml += `<div class="card" style="text-align:center"><span style="font-size:30px">${item}</span>
+                <button onclick="equip('${item}')" class="btn btn-blue" style="margin-top:5px">EQUIP</button></div>`;
+            });
+            document.getElementById('my-inventory').innerHTML = iHtml;
+        }
+
+        function buy(item) {
+            if(uData.diamonds >= 300) {
+                let inv = uData.inventory || [];
+                inv.push(item);
+                db.ref('users/'+auth.currentUser.uid).update({ diamonds: uData.diamonds - 300, inventory: inv });
+                alert("Purchased!");
+            } else alert("Not enough diamonds!");
+        }
+
+        function equip(item) {
+            let type = 'dp';
+            if(shopItems.banner.includes(item)) type = 'banner';
+            if(shopItems.badge.includes(item)) type = 'badge';
+            db.ref('users/'+auth.currentUser.uid).update({ [type]: item });
+            alert("Equipped!");
+        }
+
+        function changeName() {
+            let n = document.getElementById('new-name').value;
+            if(n && uData.diamonds >= 20) {
+                db.ref('users/'+auth.currentUser.uid).update({ name: n, diamonds: uData.diamonds - 20 });
+                alert("Name Changed! -20 💎");
+            } else alert("Need 20 Diamonds!");
+        }
+
+        function addFriend() {
+            let fuid = document.getElementById('f-uid').value;
+            if(!fuid) return;
+            let fr = uData.friends || [];
+            if(!fr.includes(fuid)) {
+                fr.push(fuid);
+                db.ref('users/'+auth.currentUser.uid).update({ friends: fr });
+                alert("Friend Added!");
+            }
+        }
+
+        function watchAd() {
+            window.open('https://pl29384318.profitablecpmratenetwork.com/35/57/7f/35577f1a0d6a720c6ba42103062b9527.js', '_blank');
+            setTimeout(() => {
+                db.ref('users/'+auth.currentUser.uid+'/diamonds').transaction(d => (d||0)+20);
+                alert("+20 Diamonds Claimed!");
+            }, 5000);
+        }
+
+        function tab(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active-screen');
+            el.classList.add('active');
+        }
+    </script>
+</body>
+</html>
