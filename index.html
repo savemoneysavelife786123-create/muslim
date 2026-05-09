@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Muslim Pro V15 - Banner & Store Master</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --bg: #0d1117; --panel: #161b22; --gold: #f3ba2f; --blue: #1f6feb; --text: #c9d1d9; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--panel); display: flex; border-top: 1px solid #30363d; height: 70px; z-index: 1000; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #8b949e; cursor: pointer; }
+        .nav-btn.active { color: var(--gold); border-top: 2px solid var(--gold); }
+
+        /* Screens */
+        .screen { display: none; padding: 20px; padding-bottom: 90px; min-height: 100vh; }
+        .active-screen { display: block; animation: fadeIn 0.4s ease; }
+
+        /* Profile Card with FIXED BANNER */
+        .profile-card { 
+            position: relative; 
+            border-radius: 20px; 
+            padding: 40px 20px; 
+            text-align: center; 
+            border: 3px solid #30363d; 
+            margin-bottom: 20px;
+            overflow: hidden;
+            background: #1c2128; /* Fallback */
+        }
+        /* Banner Overlay Layer */
+        .banner-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 150px;
+            opacity: 0.2; /* Banner emoji piche halke se dikhega */
+            z-index: 0;
+        }
+        .profile-content { position: relative; z-index: 1; }
+        
+        .p-avatar { width: 100px; height: 100px; border-radius: 50%; background: white; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 50px; border: 4px solid var(--gold); }
+        .badge-tag { position: absolute; top: 10px; right: 10px; background: var(--gold); color: black; padding: 2px 10px; border-radius: 10px; font-weight: bold; font-size: 12px; }
+
+        /* Store & Inventory Grid */
+        .section-header { color: var(--gold); margin: 25px 0 10px; border-bottom: 1px solid #30363d; padding-bottom: 5px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .item-box { background: var(--panel); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #30363d; }
+        .item-preview { font-size: 45px; display: block; margin-bottom: 10px; }
+
+        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-buy { background: var(--gold); color: #000; }
+        .btn-equip { background: var(--blue); color: #fff; }
+        .owned { background: #21262d !important; color: #484f58 !important; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- DEEN SCREEN -->
+    <div id="deen-screen" class="screen active-screen">
+        <h2 style="color:var(--gold)">Islamic Knowledge</h2>
+        <div class="item-box" style="padding: 25px; margin-bottom: 15px; border: 2px solid var(--gold);">
+            <small style="color:var(--gold)">📜 DAILY HADEES</small>
+            <p id="hadees-text" style="font-size: 18px; line-height: 1.4; margin: 15px 0;">"The best among you are those who learn the Quran and teach it."</p>
+            <button onclick="flipHadees()" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:5px 15px; border-radius:20px; font-size:12px; cursor:pointer;">FLIP NEXT</button>
+        </div>
+        <button onclick="getDiamonds()" class="btn btn-buy" style="padding:15px; font-size:16px;">📺 WATCH AD (+20 💎)</button>
+    </div>
+
+    <!-- LOBBY SCREEN -->
+    <div id="lobby-screen" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <b style="font-size:20px;">LOBBY</b>
+            <span style="color:var(--gold); font-weight:bold;">💎 <span id="v-diamonds">0</span></span>
+        </div>
+
+        <div class="profile-card" id="main-banner">
+            <div class="banner-overlay" id="banner-bg">🇸🇦</div>
+            <div class="profile-content">
+                <div class="badge-tag" id="v-badge">🎖️ Badge</div>
+                <div class="p-avatar" id="v-dp">👤</div>
+                <h2 id="v-name" style="margin:15px 0 5px;">Player</h2>
+                <div style="font-size:12px; opacity:0.7;">UID: <span id="v-uid">0000</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STORE SCREEN -->
+    <div id="store-screen" class="screen">
+        <h2 style="color:var(--gold)">Global Market</h2>
+        <div id="store-html"></div>
+    </div>
+
+    <!-- EQUIP SCREEN -->
+    <div id="equip-screen" class="screen">
+        <h2 style="color:var(--blue)">My Inventory</h2>
+        <div id="inventory-html"></div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-btn active" onclick="tab('deen-screen', this)">📖 Deen</div>
+        <div class="nav-btn" onclick="tab('lobby-screen', this)">🏠 Lobby</div>
+        <div class="nav-btn" onclick="tab('store-screen', this)">🛒 Store</div>
+        <div class="nav-btn" onclick="tab('equip-screen', this)">🎒 Equip</div>
+    </nav>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+        let uData = null;
+
+        const shopData = {
+            DP: ["🦁","🦅","🐯","🐉","🔥","💎","🌟","⚔️","👑","⚽","🎮","🧿","☪️","🕋","🕌"],
+            BANNER: ["🇸🇦","🇵🇰","🏴","🚩","🌈","🔥","🌊","❄️","✨","🌙","🕋","🕌"],
+            BADGE: ["🥇","🥈","🥉","🏆","🎖️","🏅","🔱","🚀","⚡","🔥"]
+        };
+
+        const hadeesArray = [
+            "Actions are judged by intentions.",
+            "The best among you is he who is best to his family.",
+            "Modesty is part of faith.",
+            "A Muslim is a brother of another Muslim.",
+            "Cleanliness is half of faith."
+        ];
+
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                db.ref('users/'+user.uid).on('value', s => {
+                    uData = s.val();
+                    if(!uData) {
+                        // Naya user setup (Default Banner: Saudi Flag)
+                        db.ref('users/'+user.uid).set({
+                            name: "New Player", diamonds: 500, dp: '👤', banner: '🇸🇦', badge: '🎖️',
+                            uid: Math.floor(1000 + Math.random()*9000),
+                            inventory: ['👤', '🇸🇦', '🎖️']
+                        });
+                    } else { refreshApp(); }
+                });
+            } else { auth.signInAnonymously(); }
+        });
+
+        function refreshApp() {
+            document.getElementById('v-name').innerText = uData.name;
+            document.getElementById('v-diamonds').innerText = uData.diamonds;
+            document.getElementById('v-dp').innerText = uData.dp;
+            document.getElementById('v-badge').innerText = uData.badge;
+            document.getElementById('v-uid').innerText = uData.uid;
+            
+            // BANNER RENDER FIX
+            const bannerBg = document.getElementById('banner-bg');
+            bannerBg.innerText = uData.banner || '🇸🇦';
+
+            // Store Render
+            let sHtml = '';
+            for(let cat in shopData) {
+                sHtml += `<div class="section-header">${cat} SECTION (300 💎)</div><div class="grid">`;
+                shopData[cat].forEach(item => {
+                    let owned = (uData.inventory || []).includes(item);
+                    sHtml += `<div class="item-box"><span class="item-preview">${item}</span>
+                    <button onclick="buyItem('${item}')" class="btn btn-buy ${owned?'owned':''}" ${owned?'disabled':''}>${owned?'OWNED':'BUY'}</button></div>`;
+                });
+                sHtml += `</div>`;
+            }
+            document.getElementById('store-html').innerHTML = sHtml;
+
+            // Inventory Render
+            let iHtml = '';
+            for(let cat in shopData) {
+                let myItems = (uData.inventory || []).filter(i => shopData[cat].includes(i));
+                if(myItems.length > 0) {
+                    iHtml += `<div class="section-header">MY ${cat}s</div><div class="grid">`;
+                    myItems.forEach(item => {
+                        iHtml += `<div class="item-box"><span class="item-preview">${item}</span>
+                        <button onclick="equipItem('${item}', '${cat}')" class="btn btn-equip">EQUIP</button></div>`;
+                    });
+                    iHtml += `</div>`;
+                }
+            }
+            document.getElementById('inventory-html').innerHTML = iHtml || "<p>Khali hai!</p>";
+        }
+
+        function flipHadees() {
+            const txt = document.getElementById('hadees-text');
+            txt.style.opacity = 0;
+            setTimeout(() => {
+                txt.innerText = hadeesArray[Math.floor(Math.random()*hadeesArray.length)];
+                txt.style.opacity = 1;
+            }, 300);
+        }
+
+        function buyItem(item) {
+            if(uData.diamonds >= 300) {
+                let inv = uData.inventory || [];
+                inv.push(item);
+                db.ref('users/'+auth.currentUser.uid).update({ diamonds: uData.diamonds - 300, inventory: inv });
+                alert("Mubarak! Purchased.");
+            } else alert("Need more Diamonds!");
+        }
+
+        function equipItem(item, cat) {
+            let key = cat.toLowerCase();
+            db.ref('users/'+auth.currentUser.uid).update({ [key]: item });
+            alert(cat + " Equipped!");
+        }
+
+        function getDiamonds() {
+            window.open('https://pl29384318.profitablecpmratenetwork.com/35/57/7f/35577f1a0d6a720c6ba42103062b9527.js', '_blank');
+            setTimeout(() => {
+                db.ref('users/'+auth.currentUser.uid+'/diamonds').transaction(d => (d||0)+20);
+                alert("20 Diamonds Added!");
+            }, 5000);
+        }
+
+        function tab(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active-screen');
+            el.classList.add('active');
+        }
+    </script>
+</body>
+</html>
