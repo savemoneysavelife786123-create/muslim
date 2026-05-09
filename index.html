@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muslim Pro | Login</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --gold: #f3ba2f; --bg: #0d1117; --panel: #161b22; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        
+        .login-card { background: var(--panel); padding: 30px; border-radius: 20px; border: 1px solid #30363d; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: var(--gold); margin-bottom: 25px; letter-spacing: 1px; }
+        
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #30363d; background: #0d1117; color: white; outline: none; }
+        input:focus { border-color: var(--gold); }
+        
+        button { width: 100%; padding: 12px; margin-top: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-login { background: var(--gold); color: black; }
+        .btn-signup { background: transparent; color: var(--gold); border: 1px solid var(--gold); margin-top: 10px; }
+        
+        .loading-overlay { display: none; margin-top: 15px; font-size: 14px; color: #8b949e; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2>MUSLIM PRO</h2>
+        <p style="font-size: 12px; color: #8b949e; margin-bottom: 20px;">V18 GLOBAL DASHBOARD</p>
+        
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password">
+        
+        <button class="btn-login" onclick="login()">LOGIN</button>
+        <button class="btn-signup" onclick="signup()">CREATE ACCOUNT</button>
+        
+        <div id="status" class="loading-overlay">Processing...</div>
+    </div>
+
+    <script>
+        // Aapki Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // 1. Signup Function (Naya User Banana)
+        function signup() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            const status = document.getElementById('status');
+
+            if(e < 5 || p < 6) { alert("Email/Password bohot chota hai!"); return; }
+            
+            status.style.display = "block";
+            auth.createUserWithEmailAndPassword(e, p)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                // Database mein profile initialize karna
+                db.ref('users/' + user.uid).set({
+                    name: "Player_" + Math.floor(1000 + Math.random() * 9000),
+                    email: e,
+                    diamonds: 500, // Naye user ko 500 diamonds gift
+                    dp: '👤',
+                    banner: '🇸🇦',
+                    uid: Math.floor(100000 + Math.random() * 900000),
+                    inventory: ['👤', '🇸🇦'],
+                    isBanned: false
+                }).then(() => {
+                    window.location.href = "op.html";
+                });
+            })
+            .catch((error) => {
+                alert("Signup Failed: " + error.message);
+                status.style.display = "none";
+            });
+        }
+
+        // 2. Login Function (Purana User)
+        function login() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            const status = document.getElementById('status');
+
+            status.style.display = "block";
+            auth.signInWithEmailAndPassword(e, p)
+            .then(() => {
+                window.location.href = "op.html";
+            })
+            .catch((error) => {
+                alert("Login Failed: " + error.message);
+                status.style.display = "none";
+            });
+        }
+
+        // Agar user pehle se login hai toh seedha op.html par bhejo
+        auth.onAuthStateChanged((user) => {
+            if (user) { window.location.href = "op.html"; }
+        });
+    </script>
+</body>
+</html>
