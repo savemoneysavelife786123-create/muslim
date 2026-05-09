@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lobby | Testing</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --gold: #f3ba2f; --bg: #050505; --panel: rgba(20, 20, 20, 0.9); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            margin: 0; background: var(--bg); color: white; 
+            font-family: 'Segoe UI', sans-serif; overflow: hidden;
+            height: 100vh; width: 100vw;
+        }
+
+        /* --- TOP UI --- */
+        .top-bar {
+            position: absolute; top: 10px; width: 100%; padding: 0 15px;
+            display: flex; justify-content: space-between; align-items: flex-start; z-index: 10;
+        }
+        .profile-section { display: flex; gap: 10px; align-items: center; }
+        .banner-box { 
+            width: 50px; height: 50px; background: #222; border: 2px solid var(--gold);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 30px; position: relative;
+        }
+        .badge-icon { 
+            position: absolute; bottom: -5px; right: -5px; font-size: 16px; 
+            background: #000; border-radius: 50%; padding: 2px;
+        }
+        .user-info h3 { margin: 0; font-size: 14px; color: var(--gold); letter-spacing: 1px; }
+        .user-info p { margin: 0; font-size: 10px; color: #888; }
+
+        .diamond-display {
+            background: var(--panel); border: 1px solid #333; padding: 8px 15px;
+            border-radius: 20px; font-weight: bold; color: var(--gold); display: flex; gap: 8px;
+        }
+
+        /* --- CENTER CHARACTER --- */
+        .character-stage {
+            height: 100vh; display: flex; align-items: center; justify-content: center;
+            font-size: 180px; filter: drop-shadow(0 0 20px rgba(243,186,47,0.2));
+        }
+
+        /* --- BOTTOM UI --- */
+        .bottom-actions {
+            position: absolute; bottom: 20px; width: 100%; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+        }
+        .side-btns { display: flex; flex-direction: column; gap: 15px; }
+        .btn-circle {
+            width: 55px; height: 55px; background: var(--panel); border: 1px solid #444;
+            border-radius: 15px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; font-size: 10px; color: #ccc;
+            cursor: pointer; transition: 0.2s;
+        }
+        .btn-circle:active { transform: scale(0.9); border-color: var(--gold); }
+        .btn-circle b { font-size: 20px; margin-bottom: 2px; }
+
+        /* --- SETTINGS MENU --- */
+        .settings-icon { 
+            position: absolute; top: 15px; right: 80px; font-size: 24px; cursor: pointer; 
+        }
+
+        /* --- USERNAME POPUP --- */
+        #username-popup {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .popup-box {
+            background: #111; padding: 30px; border-radius: 20px; border: 1px solid var(--gold);
+            text-align: center; width: 85%; max-width: 350px;
+        }
+        input#username-input {
+            width: 100%; padding: 12px; margin: 20px 0; background: #000;
+            border: 1px solid #333; color: #fff; border-radius: 10px; text-align: center;
+        }
+        .start-btn {
+            background: var(--gold); color: #000; padding: 12px 30px;
+            border-radius: 10px; border: none; font-weight: bold; width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="username-popup">
+        <div class="popup-box">
+            <h3>SET USERNAME</h3>
+            <p style="font-size:12px; color:#666;">Mix of 12 letters/numbers max</p>
+            <input type="text" id="username-input" placeholder="Enter username..." maxlength="12">
+            <button class="start-btn" onclick="saveUsername()">GET START</button>
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <div class="profile-section">
+            <div class="banner-box" id="v-banner">
+                <span id="v-avatar">👤</span>
+                <span class="badge-icon" id="v-badge">🎖️</span>
+            </div>
+            <div class="user-info">
+                <h3 id="v-name">...</h3>
+                <p>UID: <span id="v-uid">000000</span></p>
+            </div>
+        </div>
+
+        <div class="diamond-display">
+            💎 <span id="v-diamonds">0</span>
+        </div>
+    </div>
+
+    <div class="settings-icon" onclick="openSettings()">⚙️</div>
+
+    <div class="character-stage" id="v-char">🧍</div>
+
+    <div class="bottom-actions">
+        <div class="side-btns">
+            <div class="btn-circle" onclick="location.href='store.html'"><b>🛒</b>STORE</div>
+        </div>
+        
+        <div class="side-btns" style="flex-direction: row;">
+            <div class="btn-circle" onclick="location.href='equipment.html'"><b>🎒</b>EQUIP</div>
+            <div class="btn-circle" onclick="location.href='characters.html'"><b>🧍‍♂️</b>CHAR</div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let currentUser = null;
+
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = "index.html";
+            } else {
+                currentUser = user;
+                loadData();
+            }
+        });
+
+        function loadData() {
+            db.ref('players/' + currentUser.uid).on('value', (snap) => {
+                const data = snap.val();
+                if (!data || !data.username) {
+                    document.getElementById('username-popup').style.display = 'flex';
+                } else {
+                    document.getElementById('username-popup').style.display = 'none';
+                    updateUI(data);
+                }
+            });
+        }
+
+        function updateUI(data) {
+            document.getElementById('v-name').innerText = data.username;
+            document.getElementById('v-uid').innerText = data.uid;
+            document.getElementById('v-diamonds').innerText = data.diamonds;
+            document.getElementById('v-avatar').innerText = data.avatar;
+            document.getElementById('v-badge').innerText = data.badge;
+            document.getElementById('v-char').innerText = data.character;
+        }
+
+        async function saveUsername() {
+            const userInp = document.getElementById('username-input').value.trim();
+            const format = /^[a-zA-Z0-9]{3,12}$/;
+
+            if (!format.test(userInp)) {
+                return alert("Username must be 3-12 letters/numbers only!");
+            }
+
+            // Check if username taken
+            const snapshot = await db.ref('players').orderByChild('username').equalTo(userInp).once('value');
+            if (snapshot.exists()) {
+                return alert("Username already taken! Try another.");
+            }
+
+            db.ref('players/' + currentUser.uid).update({
+                username: userInp
+            });
+        }
+
+        function openSettings() {
+            alert("SETTINGS:\n1. Support Us\n2. Join Us\n3. Contact Us");
+            // Yahan aap apna modal bhi bana sakte hain
+        }
+    </script>
+</body>
+</html>
