@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login Fix | Battle Web</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        body { margin: 0; background: #050505; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .box { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #222; text-align: center; width: 300px; }
+        .btn { background: white; color: black; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; }
+        #msg { margin-top: 15px; color: #f3ba2f; font-size: 13px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <h1>LOGIN</h1>
+        <button class="btn" onclick="login()">Continue with Google</button>
+        <div id="msg">Processing... Please wait.</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // System: Check if already logging in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log("User detected, saving to DB...");
+                handleUser(user);
+            }
+        });
+
+        function login() {
+            document.getElementById('msg').style.display = "block";
+            const provider = new firebase.auth.GoogleAuthProvider();
+            // Try Popup first, if fails, it will redirect
+            auth.signInWithPopup(provider).then((result) => {
+                handleUser(result.user);
+            }).catch((err) => {
+                console.log("Popup blocked, trying redirect...");
+                auth.signInWithRedirect(provider);
+            });
+        }
+
+        function handleUser(user) {
+            const userRef = db.ref('players/' + user.uid);
+            
+            userRef.once('value').then((snap) => {
+                if (snap.exists()) {
+                    window.location.href = "lobby.html";
+                } else {
+                    // Naya account ka data
+                    userRef.set({
+                        username: user.displayName || "Player",
+                        email: user.email,
+                        diamonds: 1000,
+                        avatar: "👤",
+                        banner: "🚩",
+                        badge: "🎖️",
+                        character: "🧍",
+                        uid: user.uid,
+                        inventory: { avatars: ["👤"], banners: ["🚩"], badges: ["🎖️"], characters: ["🧍"] }
+                    }).then(() => {
+                        window.location.href = "lobby.html";
+                    }).catch(e => alert("DB Error: " + e.message));
+                }
+            });
+        }
+    </script>
+</body>
+</html>
