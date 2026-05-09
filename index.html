@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login | Battle Web</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        body { margin: 0; background: #050505; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-box { background: #111; padding: 30px; border-radius: 20px; border: 1px solid #222; text-align: center; width: 85%; max-width: 320px; }
+        h1 { color: #f3ba2f; letter-spacing: 2px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #333; background: #000; color: white; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #f3ba2f; }
+        .btn { background: #f3ba2f; color: black; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .toggle-btn { margin-top: 15px; font-size: 12px; color: #888; cursor: pointer; text-decoration: underline; }
+        #msg { margin-top: 15px; color: #ff4444; font-size: 12px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h1 id="form-title">SIGN UP</h1>
+        <input type="text" id="username" placeholder="Username (New Users Only)">
+        <input type="email" id="email" placeholder="Email (abc@gmail.com)">
+        <input type="password" id="password" placeholder="Password (Min 6 chars)">
+        
+        <button class="btn" id="main-btn" onclick="handleAuth()">Create Account</button>
+        
+        <div id="msg"></div>
+        <div class="toggle-btn" onclick="toggleForm()" id="toggle-text">Already have an account? Login</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCs24nzA4eeNhnL7W0UKdwGrv0uBZPfhcY",
+            authDomain: "muslim-web-59a7d.firebaseapp.com",
+            databaseURL: "https://muslim-web-59a7d-default-rtdb.firebaseio.com",
+            projectId: "muslim-web-59a7d",
+            storageBucket: "muslim-web-59a7d.firebasestorage.app",
+            messagingSenderId: "734164811000",
+            appId: "1:734164811000:web:2c00c92a9c3100585ecf0d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let isLogin = false;
+
+        // 1. Auto-check if logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) window.location.href = "lobby.html";
+        });
+
+        function toggleForm() {
+            isLogin = !isLogin;
+            document.getElementById('form-title').innerText = isLogin ? "LOGIN" : "SIGN UP";
+            document.getElementById('main-btn').innerText = isLogin ? "Login Now" : "Create Account";
+            document.getElementById('toggle-text').innerText = isLogin ? "New here? Sign Up" : "Already have an account? Login";
+            document.getElementById('username').style.display = isLogin ? "none" : "block";
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            const userN = document.getElementById('username').value;
+            const msg = document.getElementById('msg');
+
+            msg.style.display = "none";
+
+            try {
+                if (isLogin) {
+                    // LOGIN LOGIC
+                    await auth.signInWithEmailAndPassword(email, pass);
+                } else {
+                    // SIGNUP LOGIC
+                    if (userN.length < 3) throw new Error("Username too short!");
+                    
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+                    const user = userCredential.user;
+                    
+                    // Generate 6 Digit UID
+                    const sixDigitID = Math.floor(100000 + Math.random() * 900000);
+
+                    // Save to Realtime Database
+                    await db.ref('players/' + user.uid).set({
+                        username: userN,
+                        email: email,
+                        diamonds: 1000,
+                        avatar: "👤",
+                        banner: "🚩",
+                        badge: "🎖️",
+                        character: "🧍",
+                        uid: sixDigitID, // Custom 6 digit ID
+                        db_key: user.uid,
+                        inventory: { avatars: ["👤"], banners: ["🚩"], badges: ["🎖️"], characters: ["🧍"] }
+                    });
+                }
+                window.location.href = "lobby.html";
+            } catch (error) {
+                msg.style.display = "block";
+                msg.innerText = error.message;
+            }
+        }
+    </script>
+</body>
+</html>
